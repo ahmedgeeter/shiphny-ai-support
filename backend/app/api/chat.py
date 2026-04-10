@@ -197,6 +197,10 @@ async def chat(
     clean_content = ai_response.content.replace(ESCALATION_TAG, "").strip()
 
     # Add AI message (clean, no internal tags)
+    try:
+        msg_intent = Intent(ai_response.detected_intent) if ai_response.detected_intent else None
+    except ValueError:
+        msg_intent = None
     ai_message = Message(
         conversation_id=conversation.id,
         role=MessageRole.ASSISTANT,
@@ -205,7 +209,7 @@ async def chat(
         ai_confidence_score=ai_response.confidence_score,
         tokens_used=ai_response.tokens_used,
         response_time_ms=ai_response.response_time_ms,
-        detected_intent=ai_response.detected_intent
+        detected_intent=msg_intent
     )
     db.add(ai_message)
 
@@ -219,7 +223,6 @@ async def chat(
             conversation.primary_intent = None
     conversation.response_time_avg_ms = ai_response.response_time_ms
     conversation.ai_confidence_avg = ai_response.confidence_score
-    conversation.last_chat_date = datetime.utcnow()
 
     await db.commit()
 
