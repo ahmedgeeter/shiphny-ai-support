@@ -487,10 +487,12 @@ Always respond in English unless asked in Arabic."""
                     )
 
                     if response.status_code == 429:
-                        import asyncio
-                        print(f"[Groq] Rate limited, retrying in 5s... (attempt {attempt+1})")
-                        await asyncio.sleep(5)
-                        continue
+                        print(f"[Groq] Rate limited — switching to Gemini fallback")
+                        from app.services.gemini_ai import gemini_generate
+                        gemini_text = await gemini_generate(system_prompt, user_message, conversation_history)
+                        if gemini_text:
+                            ai_content = gemini_text
+                        break
 
                     response.raise_for_status()
                     data = response.json()
@@ -504,6 +506,11 @@ Always respond in English unless asked in Arabic."""
             except Exception as e:
                 print(f"Error calling Groq: {e}")
                 break
+
+        if not ai_content:
+            from app.services.gemini_ai import gemini_generate
+            print("[Groq] Failed — trying Gemini")
+            ai_content = await gemini_generate(system_prompt, user_message, conversation_history)
 
         if not ai_content:
             from app.services.fallback_responses import get_fallback_response
