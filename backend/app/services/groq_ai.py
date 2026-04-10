@@ -246,7 +246,7 @@ class GroqAIService:
         self.api_key = api_key or os.getenv("GROQ_API_KEY")
         self.model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
         self.temperature = float(os.getenv("GROQ_TEMPERATURE", "0.7"))
-        self.max_tokens = int(os.getenv("GROQ_MAX_TOKENS", "1024"))
+        self.max_tokens = int(os.getenv("GROQ_MAX_TOKENS", "512"))
 
     def _detect_language(self, message: str) -> str:
         """Auto-detect language from message content."""
@@ -465,44 +465,49 @@ Always respond in English unless asked in Arabic."""
         # Add current user message
         messages.append({"role": "user", "content": user_message})
 
-        # Call Groq API
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(
-                    self.GROQ_API_URL,
-                    headers={
-                        "Authorization": f"Bearer {self.api_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": self.model,
-                        "messages": messages,
-                        "temperature": self.temperature,
-                        "max_tokens": self.max_tokens,
-                        "top_p": 0.9,
-                    }
-                )
+        # Call Groq API with retry on rate limit
+        ai_content = None
+        tokens_used = 0
+        for attempt in range(2):
+            try:
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    response = await client.post(
+                        self.GROQ_API_URL,
+                        headers={
+                            "Authorization": f"Bearer {self.api_key}",
+                            "Content-Type": "application/json"
+                        },
+                        json={
+                            "model": self.model,
+                            "messages": messages,
+                            "temperature": self.temperature,
+                            "max_tokens": self.max_tokens,
+                            "top_p": 0.9,
+                        }
+                    )
 
-                response.raise_for_status()
-                data = response.json()
+                    if response.status_code == 429:
+                        import asyncio
+                        print(f"[Groq] Rate limited, retrying in 5s... (attempt {attempt+1})")
+                        await asyncio.sleep(5)
+                        continue
 
-                ai_content = data["choices"][0]["message"]["content"]
-                tokens_used = data.get("usage", {}).get("total_tokens", 0)
+                    response.raise_for_status()
+                    data = response.json()
+                    ai_content = data["choices"][0]["message"]["content"]
+                    tokens_used = data.get("usage", {}).get("total_tokens", 0)
+                    break
 
-        except httpx.HTTPStatusError as e:
-            print(f"Groq API error: {e.response.status_code} - {e.response.text}")
-            if detected_lang == "en":
-                ai_content = "I apologize, a technical error occurred. Please try again or call our hotline at 19282."
-            else:
-                ai_content = "عذراً، حدث خطأ تقني. يرجى المحاولة مرة أخرى أو الاتصال بالخط الساخن 19282."
-            tokens_used = 0
-        except Exception as e:
-            print(f"Error calling Groq: {e}")
-            if detected_lang == "en":
-                ai_content = "I'm sorry, I'm experiencing technical difficulties. Please contact support at 19282."
-            else:
-                ai_content = "عذراً، أواجه صعوبات تقنية. يرجى التواصل مع الدعم على 19282."
-            tokens_used = 0
+            except httpx.HTTPStatusError as e:
+                print(f"Groq API error: {e.response.status_code} - {e.response.text}")
+                break
+            except Exception as e:
+                print(f"Error calling Groq: {e}")
+                break
+
+        if not ai_content:
+            from app.services.fallback_responses import get_fallback_response
+            ai_content = get_fallback_response(user_message, detected_lang)
 
         # Calculate metrics
         response_time = (time.time() - start_time) * 1000
