@@ -103,7 +103,19 @@ async def chat(
     customer = result.scalar_one_or_none()
     
     if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
+        from app.models.customer import CustomerTier, PreferredLanguage
+        customer = Customer(
+            id=request.customer_id,
+            full_name="Guest User",
+            email=f"guest_{request.customer_id}@shiphny.com",
+            phone=f"000000000{request.customer_id}",
+            tier=CustomerTier.NEW,
+            preferred_language=PreferredLanguage.ARABIC,
+            total_orders=0,
+            total_spent_egp=0.0
+        )
+        db.add(customer)
+        await db.flush()
     
     # Get or create conversation
     if request.session_id:
