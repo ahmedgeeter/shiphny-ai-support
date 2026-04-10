@@ -1,191 +1,169 @@
-<div align="center">
+# Shiphny AI Support Agent
 
-# 🚚 Shiphny AI Support Agent
-
-**Production-ready AI customer support chatbot for a shipping & logistics company**
-
-[![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?logo=fastapi)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://typescriptlang.org)
-[![LLM](https://img.shields.io/badge/LLM-Llama_3.3_70B-orange)](https://groq.com)
-[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker)](https://docker.com)
-
+A production-ready AI customer support system for a shipping and logistics company.
+Built with FastAPI, React, and Llama 3.3 70B via the Groq API.
 
 ---
 
-## ✨ What is this?
+## Overview
 
-**Shiphny AI Support Agent** is a full-stack AI chatbot platform for **Shiphny Express**, a shipping company serving all 27 Egyptian governorates. It demonstrates a production-grade AI support system with:
+Shiphny AI Support Agent is a full-stack application that demonstrates how an AI agent
+can handle real customer support workloads for a shipping company. The AI agent, named Sara,
+handles shipment inquiries, pricing questions, complaints, and escalations in both Arabic and English.
 
-- 🤖 **Sara** — bilingual AI agent (Arabic 🇪🇬 + English) powered by Llama 3.3 70B via Groq
-- 📦 **Live booking data** — customers ask about shipments, Sara answers with real DB data
-- 📊 **Analytics dashboard** — KPIs, intent distribution, response time metrics
-- ⚡ **Sub-second AI responses** — async FastAPI + Groq inference
-- 🔄 **Persistent sessions** — conversation history saved in DB + localStorage
-- 🧠 **Smart escalation** — detects frustrated customers → flags for human handoff
+The system reads live data from a database, meaning Sara responds with accurate shipment information
+rather than generic answers.
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                         BROWSER                              │
-│                                                              │
-│  ┌─────────────────────┐    ┌──────────────────────────────┐ │
-│  │    Landing Page     │    │    Analytics Dashboard       │ │
-│  │  React + Tailwind   │    │  (KPIs, intents, response    │ │
-│  │  Bilingual AR/EN    │    │   times, customer tiers)     │ │
-│  └──────────┬──────────┘    └─────────────┬────────────────┘ │
-│             │                             │                  │
-│  ┌──────────▼─────────────────────────────▼────────────────┐ │
-│  │              PersistentChat Widget                       │ │
-│  │   Floating chatbot · localStorage history · RTL/LTR      │ │
-│  └──────────────────────────┬───────────────────────────────┘ │
-└─────────────────────────────│────────────────────────────────┘
-                              │ REST API (JSON)
-┌─────────────────────────────▼────────────────────────────────┐
-│                      FASTAPI BACKEND                         │
-│                                                              │
-│  ┌──────────────┐  ┌───────────────┐  ┌──────────────────┐  │
-│  │ Rate Limiter │  │  Chat Router  │  │ Bookings Router  │  │
-│  │ 20 req/60s   │  │ sessions &    │  │ CRUD · search ·  │  │
-│  │  per IP      │  │ history       │  │ status updates   │  │
-│  └──────────────┘  └───────┬───────┘  └──────────────────┘  │
-│                             │                                │
-│                   ┌─────────▼──────────┐                    │
-│                   │   GroqAI Service   │                    │
-│                   │                    │                    │
-│                   │ 1. Detect language │                    │
-│                   │ 2. Classify intent │                    │
-│                   │ 3. Build prompt    │                    │
-│                   │ 4. Call Llama 70B  │                    │
-│                   │ 5. Check escalate  │                    │
-│                   └─────────┬──────────┘                    │
-│                             │                                │
-│             ┌───────────────▼──────────────┐                │
-│             │        SQLite Database        │                │
-│             │  customers · bookings ·       │                │
-│             │  conversations · messages     │                │
-│             └──────────────────────────────┘                │
-└─────────────────────────────┬────────────────────────────────┘
-                              │
-              ┌───────────────▼────────────────┐
-              │        GROQ CLOUD API          │
-              │   Llama 3.3 70B Versatile      │
-              │   ~200ms inference latency     │
-              └────────────────────────────────┘
+Browser
+  |
+  |-- Landing Page (React + Tailwind CSS)
+  |-- Analytics Dashboard (React)
+  |-- Chat Widget (React, floating, RTL/LTR)
+       |
+       | HTTP REST
+       |
+  FastAPI Backend (Python 3.11)
+       |
+       |-- /api/chat          Chat endpoint, session management, conversation history
+       |-- /api/bookings      Shipment CRUD operations
+       |-- /api/analytics     Dashboard statistics and intent distribution
+       |-- /api/health        Service health check
+       |-- /api/ping          Lightweight keep-alive endpoint
+       |
+       |-- Rate Limiter (20 requests / 60 seconds per IP)
+       |
+       |-- GroqAI Service
+       |    |-- Language detection (Arabic / English)
+       |    |-- Intent classification (7 categories)
+       |    |-- System prompt builder (customer context + live booking data)
+       |    |-- Groq API call (Llama 3.3 70B, ~300ms avg)
+       |    |-- Escalation detection
+       |
+       |-- SQLite Database
+            |-- customers
+            |-- bookings
+            |-- conversations
+            |-- messages
 ```
 
 ---
 
-## 🤖 AI Pipeline
+## How the AI Works
 
-Every message goes through this pipeline:
+Each incoming message passes through the following steps in order:
+
+1. **Language detection** — identifies Arabic or English from message content
+2. **Intent classification** — categorizes as: booking inquiry, complaint, pricing, tracking, or general
+3. **Context assembly** — loads customer profile, tier, total orders, and live shipment records from the database
+4. **Prompt construction** — builds a structured system prompt with the full knowledge base and customer-specific context
+5. **Groq API call** — sends the conversation to Llama 3.3 70B, average latency under 500ms
+6. **Escalation check** — detects the escalation trigger tag and flags the conversation for human handoff
+7. **Persistence** — saves the message, AI response, detected intent, confidence score, and response time to the database
+
+---
+
+## Features
+
+| Feature               | Description                                                                 |
+|-----------------------|-----------------------------------------------------------------------------|
+| Bilingual AI Agent    | Arabic and English, language auto-detected per message                      |
+| Live Booking Data     | AI queries real shipment records and responds with accurate information      |
+| Intent Detection      | 7 intent categories with confidence scoring                                 |
+| Session Memory        | Conversation history stored in the database and browser localStorage        |
+| Analytics Dashboard   | Conversations, customers, avg response time, resolution rate, intent chart  |
+| Human Escalation      | Detects frustrated customers and flags the session for agent handoff        |
+| Customer Tiers        | VIP, Premium, Standard — Sara adapts response tone per tier                 |
+| Rate Limiting         | 20 messages per 60 seconds per IP address                                   |
+| Booking Management    | Full create, read, and status update operations on shipments                |
+| Docker Support        | Docker Compose setup for one-command local or cloud deployment              |
+| Auto API Docs         | OpenAPI documentation auto-generated at /api/docs                           |
+
+---
+
+## Tech Stack
+
+| Layer      | Technology                                       |
+|------------|--------------------------------------------------|
+| LLM        | Llama 3.3 70B Versatile via Groq API             |
+| Backend    | FastAPI 0.111, Python 3.11, async SQLAlchemy 2   |
+| Database   | SQLite (dev), compatible with PostgreSQL         |
+| Frontend   | React 18, TypeScript 5, Vite, Tailwind CSS       |
+| HTTP       | httpx for async external API calls               |
+| Validation | Pydantic v2                                      |
+| Container  | Docker and Docker Compose                        |
+
+---
+
+## Project Structure
 
 ```
-User Message
-     │
-     ▼
-[1] Language Detection ──── Arabic (ar) or English (en)
-     │
-     ▼
-[2] Intent Classification ─ booking_inquiry · complaint · pricing
-                             tracking · general · escalation
-     │
-     ▼
-[3] Context Building ─────── Customer name + tier + order count
-                             Live booking data from DB
-                             Last 8 conversation messages
-     │
-     ▼
-[4] Groq API Call ────────── Llama 3.3 70B — ~200ms avg
-     │
-     ▼
-[5] Escalation Check ─────── Detect [ESCALATE_TO_HUMAN] tag
-     │
-     ▼
-[6] Persist to DB ─────────── Save message + response + metadata
-     │
-     ▼
-Response → User
+shiphny-ai-support/
+|-- backend/
+|   |-- main.py                    FastAPI app, startup hooks, health and ping endpoints
+|   |-- requirements.txt
+|   |-- Dockerfile
+|   |-- app/
+|       |-- api/
+|       |   |-- chat.py            Chat endpoint, session and history management, rate limiter
+|       |   |-- bookings.py        Booking CRUD
+|       |   |-- analytics.py       Dashboard statistics
+|       |   |-- customers.py       Customer read operations
+|       |-- models/
+|       |   |-- customer.py        Customer model with tier enum (VIP, Premium, Standard)
+|       |   |-- booking.py         Booking model with status enum
+|       |   |-- conversation.py    Conversation, Message, and Intent models
+|       |-- services/
+|       |   |-- groq_ai.py         Core AI service: language detection, intent, prompts, Groq calls
+|       |-- db/
+|       |   |-- database.py        Async session factory and database initialization
+|       |-- core/
+|           |-- config.py          Application settings via pydantic-settings
+|-- frontend/
+|   |-- src/
+|   |   |-- App.tsx                Main app, landing page, booking form, routing
+|   |   |-- translations.ts        Arabic and English UI string definitions
+|   |   |-- components/
+|   |       |-- PersistentChat.tsx  Floating chat widget with session and localStorage
+|   |       |-- Dashboard.tsx       Analytics dashboard component
+|   |       |-- ChatWidget.tsx      Inline chat component
+|   |       |-- Layout.tsx          Page layout wrapper
+|   |-- Dockerfile
+|   |-- nginx.conf
+|-- docker-compose.yml
+|-- render.yaml                    Render.com one-click deployment config
+|-- .env.example                   Environment variable reference
 ```
 
 ---
 
-## 🎯 Features
+## Getting Started
 
-| Feature | Details |
-|---------|--------|
-| **AI Agent "Sara"** | Llama 3.3 70B via Groq — sub-second responses |
-| **Bilingual** | Arabic (RTL) + English — auto-detected per message |
-| **Live Booking Data** | AI reads real shipment data from DB |
-| **Intent Detection** | 7 intent categories with confidence scoring |
-| **Human Escalation** | Detects frustrated customers → flags for handoff |
-| **Session Memory** | History persisted in DB + localStorage |
-| **Analytics Dashboard** | KPIs, intent chart, avg response time |
-| **Rate Limiting** | 20 messages / 60s per IP |
-| **Customer Tiers** | VIP / Premium / Standard — Sara adapts tone |
-| **Booking System** | Full CRUD — create, track, update shipments |
-| **Docker Ready** | Single `docker compose up --build` |
-| **REST API Docs** | Auto-generated at `/api/docs` |
+### Requirements
 
----
+- Python 3.11 or higher
+- Node.js 18 or higher
+- Groq API key (free at https://console.groq.com)
 
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|----------|
-| **LLM** | Llama 3.3 70B via Groq API |
-| **Backend** | FastAPI 0.111 + Python 3.11 + async SQLAlchemy |
-| **Database** | SQLite (dev) — swappable to PostgreSQL |
-| **Frontend** | React 18 + TypeScript + Vite + Tailwind CSS |
-| **HTTP Client** | httpx (async Groq calls) |
-| **Validation** | Pydantic v2 |
-| **Container** | Docker + Docker Compose |
-
----
-
-## 🚀 Quickstart
-
-### Option 1 — Docker
-
-```bash
-git clone https://github.com/your-username/shiphny-ai-support
-cd shiphny-ai-support
-
-cp .env.example backend/.env
-# Set GROQ_API_KEY in backend/.env
-
-docker compose up --build
-```
-
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:3000 |
-| Backend API | http://localhost:8000 |
-| API Docs | http://localhost:8000/api/docs |
-
----
-
-### Option 2 — Local Development
+### Local Development
 
 **Backend**
 
 ```bash
 cd backend
-python -m venv .venv
 
-# Windows
-.venv\Scripts\activate
-# macOS / Linux
-source .venv/bin/activate
+python -m venv .venv
+.venv\Scripts\activate        # Windows
+source .venv/bin/activate       # macOS and Linux
 
 pip install -r requirements.txt
 
 cp ../.env.example .env
-# Set GROQ_API_KEY in .env
+# Open .env and set GROQ_API_KEY
 
 uvicorn main:app --reload --port 8000
 ```
@@ -196,166 +174,141 @@ uvicorn main:app --reload --port 8000
 cd frontend
 npm install
 npm run dev
-# → http://localhost:3000
+```
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/api/docs
+
+### Docker
+
+```bash
+cp .env.example backend/.env
+# Set GROQ_API_KEY in backend/.env
+
+docker compose up --build
 ```
 
 ---
 
-## ⚙️ Environment Variables
+## Environment Variables
 
-```env
-# Required
-GROQ_API_KEY=gsk_...          # Free at console.groq.com
-GROQ_MODEL=llama-3.3-70b-versatile
-
-# Optional
-APP_NAME=Shiphny AI Support
-DATABASE_URL=sqlite+aiosqlite:///./supportbot.db
-CORS_ORIGINS=["http://localhost:3000","https://your-app.vercel.app"]
-DEBUG=false
-```
+| Variable       | Required | Description                                    |
+|----------------|----------|------------------------------------------------|
+| GROQ_API_KEY   | Yes      | API key from console.groq.com (free)           |
+| GROQ_MODEL     | No       | Defaults to llama-3.3-70b-versatile            |
+| DATABASE_URL   | No       | Defaults to SQLite                             |
+| CORS_ORIGINS   | No       | List of allowed frontend origins               |
+| DEBUG          | No       | Set to true for development logging            |
 
 ---
 
-## 📡 API Reference
+## API Reference
 
-### Chat
+### POST /api/chat
 
-```http
-POST /api/chat
-Content-Type: application/json
-
-{
-  "message": "اخبرني عن شحنتي SH-12345678",
-  "customer_id": 1,
-  "session_id": "abc123",
-  "language": "ar"
-}
-```
-
-**Response:**
 ```json
+Request:
 {
-  "response": "شحنتك SH-12345678 في الطريق إليك 📦",
+  "message": "Where is my shipment SH-12345678?",
+  "customer_id": 1,
+  "session_id": "existing-session-id-or-omit-to-start-new",
+  "language": "en"
+}
+
+Response:
+{
+  "response": "Your shipment SH-12345678 is currently in transit.",
   "session_id": "abc123",
-  "confidence": 0.92,
-  "response_time_ms": 213.4,
+  "confidence": 0.91,
+  "response_time_ms": 312.4,
   "detected_intent": "booking_inquiry",
   "escalated": false
 }
 ```
 
-### Bookings
+### GET /api/analytics/dashboard
 
-| Method | Endpoint | Description |
-|--------|----------|-----------|
-| `GET` | `/api/bookings` | List all bookings (paginated) |
-| `POST` | `/api/bookings` | Create new booking |
-| `GET` | `/api/bookings/{id}` | Get booking details |
-| `PATCH` | `/api/bookings/{id}/status` | Update booking status |
+Returns: total conversations, customer count, average response time, resolved count, escalated count.
 
-### Analytics
+### GET /api/analytics/intents
 
-| Method | Endpoint | Description |
-|--------|----------|-----------|
-| `GET` | `/api/analytics/dashboard` | KPIs: conversations, customers, avg response time |
-| `GET` | `/api/analytics/intents` | Intent distribution with percentages |
+Returns: intent distribution with counts and percentages.
 
-### Health
+### GET /api/bookings
 
-```http
-GET /api/health
-→ { "status": "healthy", "version": "1.0.0" }
-```
+Returns: paginated list of all bookings.
+
+### POST /api/bookings
+
+Creates a new shipment booking record.
+
+### GET /api/health
+
+Returns: application status and version.
+
+### GET /api/ping
+
+Lightweight keep-alive endpoint, returns `{"ok": true}` with no database access.
 
 ---
 
-## 💬 Example Conversations
+## Deployment
 
-**Booking inquiry — Arabic**
+The repository includes a `render.yaml` file for automated deployment to Render.com.
+
+**Backend on Render**
+
+1. Go to render.com and create a new Web Service
+2. Connect this repository
+3. Render reads render.yaml automatically — no manual configuration needed
+4. Add one environment variable: GROQ_API_KEY
+5. Deploy
+
+**Frontend on Vercel**
+
+1. Go to vercel.com and import this repository
+2. Set the root directory to frontend
+3. Add environment variable: VITE_API_URL = your Render backend URL
+4. Deploy
+
+**Preventing Cold Starts**
+
+The free Render tier pauses after 15 minutes of inactivity, causing a ~30 second delay on the next request.
+To prevent this, set up a free cron job at cron-job.org to call GET /api/ping on your backend every 14 minutes.
+
+---
+
+## Example Conversations
+
+**Shipment inquiry in Arabic**
 ```
 User:  اخبرني عن شحنتي SH-34634614
-Sara:  مرحباً يا أحمد! 📦
-       شحنتك SH-34634614 — شحن قياسي
+Sara:  شحنتك SH-34634614 - شحن قياسي
        الحالة: قيد الانتظار
-       من القاهرة ← إلى الإسكندرية | 2 كجم
-       هل تريد معرفة الوقت المتوقع للتسليم؟ 🕒
+       من القاهرة الى الاسكندرية - 2 كجم
+       هل تريد معرفة الوقت المتوقع للتسليم؟
 ```
 
-**Pricing — English**
+**Pricing question in English**
 ```
 User:  How much does express shipping cost?
-Sara:  Express shipping starts at EGP 45 🚚
-       • Same-day delivery in Greater Cairo
-       • 24-hour delivery to all governorates
-       • Includes real-time tracking + SMS + insurance
+Sara:  Express shipping starts at EGP 45.
+       Same-day delivery in Greater Cairo.
+       24-hour delivery to all 27 governorates.
+       Includes real-time tracking, SMS notifications, and full insurance.
 ```
 
-**Escalation**
+**Escalation trigger**
 ```
-User:  هذا غير مقبول! أريد التحدث مع مدير الآن!
-Sara:  أفهم مدى إحباطك، سأحوّل محادثتك لمشرف الآن. 🔴
-       → [Flagged for human handoff]
-```
-
----
-
-## 📁 Project Structure
-
-```
-shiphny-ai-support/
-├── backend/
-│   ├── main.py                    # FastAPI app entry point
-│   ├── requirements.txt
-│   ├── Dockerfile
-│   ├── supportbot.db              # SQLite database
-│   ├── seed/                      # DB seed data scripts
-│   └── app/
-│       ├── api/
-│       │   ├── chat.py            # Chat endpoints + session management
-│       │   ├── bookings.py        # Booking CRUD
-│       │   └── analytics.py       # Dashboard stats
-│       ├── models/
-│       │   ├── customer.py        # Customer + tier enum
-│       │   ├── booking.py         # Booking + status enum
-│       │   └── conversation.py    # Conversation + Message + Intent
-│       ├── services/
-│       │   └── groq_ai.py         # AI: prompts, intent detection, Groq calls
-│       ├── db/
-│       │   └── database.py        # AsyncSession, init_db
-│       └── core/
-│           └── config.py          # Settings via pydantic-settings
-├── frontend/
-│   ├── src/
-│   │   ├── App.tsx                # Main app + landing page + booking form
-│   │   ├── translations.ts        # Arabic / English UI strings
-│   │   └── components/
-│   │       ├── PersistentChat.tsx # Floating AI chat widget
-│   │       ├── Dashboard.tsx      # Analytics dashboard
-│   │       ├── ChatWidget.tsx     # Inline chat component
-│   │       └── Layout.tsx         # Page layout wrapper
-│   ├── Dockerfile
-│   └── nginx.conf
-├── docker-compose.yml
-├── .env.example
-└── README.md
+User:  This is unacceptable. I want to speak to a manager immediately.
+Sara:  I completely understand your frustration and I apologize for the inconvenience.
+       I am escalating your case to a specialist right now.
+       [Conversation flagged for human handoff]
 ```
 
 ---
 
-## 🔑 Get a Free Groq API Key
+## License
 
-1. Visit [console.groq.com](https://console.groq.com)
-2. Sign up — free
-3. Create API key
-4. Add to `.env` → `GROQ_API_KEY=gsk_...`
-
-Free tier: **100,000 tokens/day** — enough for development and demos.
-
----
-
-## 📄 License
-
-MIT — free to use for portfolio, demos, and commercial projects.
-#   s h i p h n y - a i - s u p p o r t  
- 
+MIT
