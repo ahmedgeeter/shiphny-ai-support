@@ -37,80 +37,15 @@ KNOWLEDGE_BASE_AR = """شحني Express | خط ساخن: 19282 | واتساب: 0
 التتبع: رقم الشحنة يبدأ بـ SH- متبوع 8 أرقام
 """
 
-KNOWLEDGE_BASE_EN = """
-## Shiphny Express Knowledge Base
-
-### Company Information
-- Name: Shiphny Express (شحني)
-- Founded: 2019
-- HQ: Cairo, Egypt
-- Hotline: 19282
-- Working Hours: 24/7
-- Employees: 500+
-- Delivery Vehicles: 200+
-- Sorting Centers: 15
-
-### Shipping Services
-1. **Express Shipping**: Same-day delivery for Greater Cairo, 24 hours for governorates. Starting from EGP 45. Includes real-time tracking + SMS notifications + full insurance.
-2. **Standard Shipping**: Delivery within 2-3 business days. Starting from EGP 35. Includes shipment tracking + safe delivery.
-3. **Business Solutions**: Monthly and annual contracts with up to 40% discount. Includes dedicated account manager + monthly invoices + daily reports.
-4. **E-commerce Shipping**: Integrated solutions for online stores with API integration and COD (Cash on Delivery).
-
-### Coverage
-- We serve all 27 Egyptian governorates
-- Greater Cairo: Cairo, Giza, Qalyubia
-- Delta: Alexandria, Beheira, Kafr El Sheikh, Gharbia, Monufia, Dakahlia, Damietta
-- Upper Egypt: Fayoum, Beni Suef, Minya, Assiut, Sohag, Qena, Luxor, Aswan
-- Canal: Port Said, Ismailia, Suez
-- Border: Matrouh, Red Sea, New Valley, North Sinai, South Sinai
-
-### Shipping Prices
-- Greater Cairo: from EGP 35 (standard) / EGP 45 (express)
-- Alexandria & Delta: from EGP 40 (standard) / EGP 55 (express)
-- Upper Egypt: from EGP 50 (standard) / EGP 70 (express)
-- Border Governorates: from EGP 60 (standard) / EGP 85 (express)
-- Free shipping for orders over EGP 500 (Cairo only)
-- Business rates start from EGP 25/shipment (based on monthly volume)
-
-### Tracking
-- Track via website: shiphny.com/track
-- Or hotline: 19282
-- Or WhatsApp: 01001928200
-- Tracking number starts with SH- followed by 8 digits (e.g., SH-12345678)
-- SMS notifications at: Shipment created, Collected from merchant, At sorting center, Out for delivery, Delivered
-
-### Returns & Refunds
-- Return within 14 days of delivery
-- Must be in original condition
-- Refund within 3-5 business days
-- Free return for manufacturer defects
-- EGP 15 return fee for refusal without reason
-
-### Insurance
-- Free insurance up to EGP 2,000
-- Extended insurance up to EGP 50,000 (add 1% of shipment value)
-- Full compensation for loss or damage caused by company
-
-### Payment Methods
-- Cash on Delivery (COD)
-- Vodafone Cash
-- Bank Transfer
-- Credit Cards (Visa / Mastercard)
-- Fawry / Masary
-
-### Delivery Times
-- Greater Cairo: Same day (if before 12 PM) or next day
-- Alexandria & Delta: 1-2 business days
-- Upper Egypt: 2-3 business days
-- Border Governorates: 3-5 business days
-- No Friday deliveries
-
-### Common Issues Resolution
-- Delayed shipment: Check tracking number first, if delayed beyond estimated time call 19282
-- Damaged shipment: Take photos and contact us within 24 hours for compensation
-- Wrong address: Can be corrected before out for delivery via 19282
-- Refused delivery: One free re-delivery, then EGP 15 per attempt
-- Lost shipment: Full compensation within 7 business days after verification
+KNOWLEDGE_BASE_EN = """Shiphny Express | Hotline: 19282 | WhatsApp: 01001928200 | Track: shiphny.com/track
+Prices: Cairo 35/45 EGP | Alexandria&Delta 40/55 | Upper Egypt 50/70 | Border 60/85 (standard/express)
+Coverage: All 27 Egyptian governorates including Cairo, Alexandria, Aswan, Sharm, Hurghada, Sinai
+Delivery: Cairo same-day (before 12PM) | Delta 1-2 days | Upper Egypt 2-3 days | Border 3-5 days | No Friday delivery
+Returns: 14 days | Refund 3-5 days | Free for defects | 15 EGP fee for no-reason refusal
+Insurance: Free up to 2000 EGP | Extended up to 50,000 EGP (1% of value)
+Payment: Cash/COD/Vodafone Cash/Visa/Fawry
+Business: 40% discount | from 25 EGP/shipment | dedicated account manager
+Tracking number: starts with SH- followed by 8 digits
 """
 
 
