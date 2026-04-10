@@ -28,11 +28,11 @@ async def gemini_generate(system_prompt: str, user_message: str, history: list =
     contents.append({"role": "user", "parts": [{"text": user_message}]})
 
     payload = {
-        "system_instruction": {"parts": [{"text": system_prompt}]},
+        "system_instruction": {"role": "system", "parts": [{"text": system_prompt}]},
         "contents": contents,
         "generationConfig": {
             "temperature": 0.7,
-            "maxOutputTokens": 512,
+            "maxOutputTokens": 600,
             "topP": 0.9,
         }
     }
