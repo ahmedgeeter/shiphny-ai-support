@@ -85,7 +85,7 @@ async def get_config():
     }
 
 
-# Include API routers
+# Include API routers — v5
 app.include_router(chat_router)
 app.include_router(analytics_router)
 app.include_router(customers_router)
