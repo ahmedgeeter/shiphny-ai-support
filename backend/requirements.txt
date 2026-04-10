@@ -1,0 +1,52 @@
+# Core
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-dotenv==1.0.1
+pydantic==2.7.1
+pydantic-settings==2.2.1
+
+# LangChain / LangGraph
+langchain==0.2.1
+langchain-community==0.2.1
+langchain-openai==0.1.7
+langchain-groq==0.1.6
+langgraph==0.1.1
+langgraph-checkpoint-postgres==1.0.0
+
+# HTML parsing
+beautifulsoup4==4.12.3
+lxml==5.2.2
+
+# Database
+sqlalchemy==2.0.30
+alembic==1.13.1
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+
+# Tools
+tavily-python==0.3.3
+pypdf==4.2.0
+httpx==0.27.0
+aiofiles==23.2.1
+
+# Auth & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+
+# Task queue
+celery==5.4.0
+redis==5.0.4
+
+# SSE streaming
+sse-starlette==2.1.0
+
+# LangSmith tracing
+langsmith==0.1.75
+
+# Markdown report rendering
+markdown==3.6
+
+# Observability
+structlog==24.1.0
+prometheus-fastapi-instrumentator==6.1.0
