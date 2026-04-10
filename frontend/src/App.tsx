@@ -1,3 +1,4 @@
+import { API_BASE } from './api'
 import React, { useState, useEffect, useRef } from 'react'
 import {
   Package, MapPin, Phone, Clock, Shield,
@@ -241,7 +242,7 @@ function BookingModal({ service, lang, onClose }: { service: string; lang: Langu
     setSubmitting(true)
     setApiError(null)
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings`, {
+      const res = await fetch(`${API_BASE}/api/bookings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -456,7 +457,7 @@ export default function App() {
 
   const checkApiStatus = async () => {
     try {
-      const r = await fetch(`${import.meta.env.VITE_API_URL}/api/health`)
+      const r = await fetch(`${API_BASE}/api/health`)
       setApiStatus(r.ok ? 'online' : 'offline')
     } catch { setApiStatus('offline') }
   }

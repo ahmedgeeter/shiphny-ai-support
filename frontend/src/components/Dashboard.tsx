@@ -1,3 +1,4 @@
+import { API_BASE } from '../api'
 import React, { useState, useEffect } from 'react'
 import { 
   MessageSquare, Users, Clock, TrendingUp, 
@@ -34,14 +35,14 @@ export function Dashboard() {
       setLoading(true)
       
       // Fetch stats
-      const statsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/analytics/dashboard`)
+      const statsRes = await fetch(`${API_BASE}/api/analytics/dashboard`)
       if (statsRes.ok) {
         const statsData = await statsRes.json()
         setStats(statsData)
       }
 
       // Fetch intents
-      const intentsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/analytics/intents`)
+      const intentsRes = await fetch(`${API_BASE}/api/analytics/intents`)
       if (intentsRes.ok) {
         const intentsData = await intentsRes.json()
         setIntents(intentsData)

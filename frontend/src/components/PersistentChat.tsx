@@ -1,3 +1,4 @@
+import { API_BASE } from '../api'
 import React, { useState, useRef, useEffect } from 'react'
 import { Send, User, Headphones, Loader2, AlertCircle, X, MessageCircle, Minimize2, Maximize2 } from 'lucide-react'
 import { translations, Language } from '../translations'
@@ -83,7 +84,7 @@ export function PersistentChat({ apiStatus, lang }: PersistentChatProps) {
     setError(null)
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chat`, {
+      const response = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
