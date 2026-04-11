@@ -24,13 +24,39 @@ async def check_api_key():
     """Check API key status."""
     service = get_groq_service()
     gemini_key = os.getenv("GEMINI_API_KEY")
+    openrouter_key = os.getenv("OPENROUTER_API_KEY")
     return {
         "groq_key_exists": bool(service.api_key),
         "groq_key_preview": service.api_key[:20] + "..." if service.api_key else None,
-        "groq_model": service.model,
         "gemini_key_exists": bool(gemini_key),
         "gemini_key_preview": gemini_key[:20] + "..." if gemini_key else None,
+        "openrouter_key_exists": bool(openrouter_key),
+        "openrouter_key_preview": openrouter_key[:20] + "..." if openrouter_key else None,
     }
+
+@router.get("/test-openrouter")
+async def test_openrouter():
+    """Live test OpenRouter free model."""
+    import httpx
+    key = os.getenv("OPENROUTER_API_KEY")
+    if not key:
+        return {"error": "No OPENROUTER_API_KEY set", "success": False}
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json",
+                         "HTTP-Referer": "https://shiphny-ai-support.onrender.com"},
+                json={"model": "openai/gpt-oss-120b:free",
+                      "messages": [{"role": "user", "content": "كم سعر الشحن للإسكندرية في شحني؟"}],
+                      "max_tokens": 100}
+            )
+            if response.status_code == 200:
+                text = response.json()["choices"][0]["message"]["content"]
+                return {"success": True, "response": text}
+            return {"success": False, "status": response.status_code, "body": response.text[:200]}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @router.get("/test-gemini")
 async def test_gemini():

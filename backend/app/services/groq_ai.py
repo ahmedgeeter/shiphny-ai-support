@@ -474,44 +474,66 @@ Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-
         ai_content = None
         tokens_used = 0
 
-        # 1) Try Groq first
         messages = [{"role": "system", "content": system_prompt}]
         if conversation_history:
             for msg in conversation_history[-6:]:
                 messages.append({"role": msg.get("role", "user"), "content": msg.get("content", "")})
         messages.append({"role": "user", "content": user_message})
-        for attempt in range(2):
+
+        # 1) Try OpenRouter first (free models, no rate limit issues)
+        openrouter_key = os.getenv("OPENROUTER_API_KEY")
+        if openrouter_key:
             try:
                 async with httpx.AsyncClient(timeout=30.0) as client:
                     response = await client.post(
-                        self.GROQ_API_URL,
-                        headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"},
-                        json={"model": self.model, "messages": messages, "temperature": self.temperature, "max_tokens": self.max_tokens}
+                        "https://openrouter.ai/api/v1/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {openrouter_key}",
+                            "Content-Type": "application/json",
+                            "HTTP-Referer": "https://shiphny-ai-support.onrender.com",
+                        },
+                        json={
+                            "model": "openai/gpt-oss-120b:free",
+                            "messages": messages,
+                            "temperature": self.temperature,
+                            "max_tokens": self.max_tokens,
+                        }
                     )
                     if response.status_code == 200:
                         data = response.json()
                         ai_content = data["choices"][0]["message"]["content"]
                         tokens_used = data.get("usage", {}).get("total_tokens", 0)
-                        print(f"[AI] Groq responded (attempt {attempt+1})")
-                        break
-                    elif response.status_code == 429:
-                        print(f"[Groq] Rate limited attempt {attempt+1}, retrying in 3s...")
-                        import asyncio
-                        await asyncio.sleep(3)
+                        print("[AI] OpenRouter responded")
                     else:
-                        print(f"[Groq] Error {response.status_code}: {response.text[:100]}")
-                        break
+                        print(f"[OpenRouter] Error {response.status_code}: {response.text[:150]}")
             except Exception as e:
-                print(f"[Groq] Exception: {e}")
-                break
+                print(f"[OpenRouter] Exception: {e}")
 
-        # 2) Fallback to Gemini if Groq fails
+        # 2) Fallback to Groq
         if not ai_content:
-            print("[AI] Groq failed — trying Gemini")
-            from app.services.gemini_ai import gemini_generate
-            ai_content = await gemini_generate(system_prompt, user_message, conversation_history)
-            if ai_content:
-                print("[AI] Gemini responded")
+            print("[AI] OpenRouter failed — trying Groq")
+            for attempt in range(2):
+                try:
+                    async with httpx.AsyncClient(timeout=30.0) as client:
+                        response = await client.post(
+                            self.GROQ_API_URL,
+                            headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"},
+                            json={"model": self.model, "messages": messages, "temperature": self.temperature, "max_tokens": self.max_tokens}
+                        )
+                        if response.status_code == 200:
+                            data = response.json()
+                            ai_content = data["choices"][0]["message"]["content"]
+                            tokens_used = data.get("usage", {}).get("total_tokens", 0)
+                            print(f"[AI] Groq responded (attempt {attempt+1})")
+                            break
+                        elif response.status_code == 429:
+                            import asyncio
+                            await asyncio.sleep(3)
+                        else:
+                            break
+                except Exception as e:
+                    print(f"[Groq] Exception: {e}")
+                    break
 
         # 3) Static fallback
         if not ai_content:
