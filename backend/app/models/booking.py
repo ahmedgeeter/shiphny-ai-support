@@ -35,6 +35,7 @@ class Booking(Base):
     # Sender
     sender_name  = Column(String(100), nullable=False)
     sender_phone = Column(String(20),  nullable=False)
+    sender_email = Column(String(120), nullable=True)
 
     # Shipment details
     pickup_address   = Column(String(300), nullable=False)
@@ -52,15 +53,23 @@ class Booking(Base):
     def __repr__(self) -> str:
         return f"<Booking(ref={self.reference}, sender={self.sender_name}, status={self.status.value})>"
 
+    STATUS_AR = {
+        "pending":   "قيد الانتظار",
+        "confirmed": "تم التأكيد",
+        "collected": "تم الاستلام من المرسل",
+        "delivered": "تم التوصيل",
+        "cancelled": "ملغي",
+    }
+
     def to_ai_context(self, mask_phone: bool = True) -> str:
-        """Return a one-line summary for injection into the AI system prompt."""
-        phone = _mask_phone(self.sender_phone) if mask_phone else self.sender_phone
+        """Return a human-readable summary for injection into the AI system prompt. Never expose email."""
+        status_ar = self.STATUS_AR.get(self.status.value, self.status.value)
         return (
-            f"رقم الحجز: {self.reference} | "
-            f"المرسل: {self.sender_name} ({phone}) | "
+            f"رقم الشحنة: {self.reference} | "
+            f"الاسم: {self.sender_name} | "
             f"الخدمة: {self.service_type} | "
             f"من: {self.pickup_address} → إلى: {self.delivery_address} | "
-            f"الحالة: {self.status.value} | "
+            f"الحالة: {status_ar} | "
             f"الوزن: {self.weight_kg or 'غير محدد'} كجم | "
             f"تاريخ الحجز: {self.created_at.strftime('%Y-%m-%d %H:%M') if self.created_at else '-'}"
         )

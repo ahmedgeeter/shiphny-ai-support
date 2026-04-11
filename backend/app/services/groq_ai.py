@@ -359,34 +359,61 @@ class GroqAIService:
         self,
         customer_context: Dict[str, Any],
         detected_lang: str = None,
-        recent_bookings_text: str = ""
+        recent_bookings_text: str = "",
+        identity_verified: bool = False,
     ) -> str:
         """Build professional system prompt for Sara - Shiphny AI Agent."""
 
         customer_name = customer_context.get("name", "العميل" if detected_lang != "en" else "Customer")
-        customer_tier = customer_context.get("tier", "عميل" if detected_lang != "en" else "Customer")
-        order_count = customer_context.get("order_count", 0)
         language = detected_lang or customer_context.get("language", "ar")
 
         # Choose knowledge base based on language
         kb = KNOWLEDGE_BASE_AR if language == "ar" else KNOWLEDGE_BASE_EN
 
-        # Append live bookings section if present
-        live_section = recent_bookings_text if recent_bookings_text else ""
-
-        booking_section = ""
+        # Live bookings — only shown after identity is verified
+        bookings_section = recent_bookings_text if (recent_bookings_text and identity_verified) else ""
 
         if language == "ar":
+            verification_rules = """
+=== قواعد التحقق من الهوية (مهمة جداً) ===
+عندما يسأل العميل عن تفاصيل شحنة معينة (الحالة، الموقع، التفاصيل، رقم SH-):
+1. اطلب منه أولاً رقم الشحنة إذا لم يذكره.
+2. بعد ذلك اطلب منه التحقق من هويته بإحدى الطرق الثلاث:
+   أ) آخر 4 أرقام من رقم الموبايل المسجل
+   ب) أول اسمين (الاسم الأول والثاني)
+   ج) البريد الإلكتروني المسجل مع الشحنة
+3. بعد أن يعطيك البيانات، أخبره بأنك ستتحقق منها وأخبره بنتيجة التحقق.
+4. إذا تم التحقق بنجاح — اعرض تفاصيل الشحنة كاملة.
+5. إذا فشل التحقق — اعتذر وادعه للمحاولة مرة أخرى أو الاتصال بـ 19282.
+6. لا تعرض أي تفاصيل شحنة قبل التحقق من الهوية.
+ملاحظة: يتم التحقق تلقائياً عبر النظام — إذا رأيت [VERIFIED:رقم الشحنة] في السياق فهذا يعني تم التحقق.
+"""
             prompt = f"""أنت سارة، موظفة خدمة عملاء شركة شحني للشحن في مصر. العميل: {customer_name}.
 ردودك: قصيرة، ودية، بالعربية المصرية، بالإيموجي المناسب.
 لا تخترع معلومات — استخدم قاعدة المعلومات فقط. للأسئلة الخارجة عن نطاقك: حوّل للخط الساخن 19282.
+{verification_rules}
 {kb}
-{booking_section}"""
+{bookings_section}"""
         else:
+            verification_rules = """
+=== Identity Verification Rules (Very Important) ===
+When a customer asks about a specific shipment (status, location, details, SH- number):
+1. Ask for the shipment reference number if not provided.
+2. Then ask them to verify identity using ONE of three methods:
+   a) Last 4 digits of the registered mobile number
+   b) First two names (first and last name)
+   c) Email address registered with the shipment
+3. After they provide details, inform them you are verifying and share the result.
+4. If verified — show full shipment details.
+5. If failed — apologize and offer to try again or call 19282.
+6. NEVER show shipment details before identity verification.
+Note: Verification is done automatically — if you see [VERIFIED:reference] in context it means verified.
+"""
             prompt = f"""You are Sara, a customer service agent at Shiphny Express (Egypt shipping company). Customer: {customer_name}.
 Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-scope questions refer to hotline 19282.
+{verification_rules}
 {kb}
-{booking_section}"""
+{bookings_section}"""
 
         return prompt
 
@@ -408,26 +435,50 @@ Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-
 
         return "general", 0.5
 
-    async def _load_recent_bookings(self, db=None, customer_id: int = None) -> str:
+    async def _load_recent_bookings(
+        self,
+        db=None,
+        customer_id: int = None,
+        verified_ref: str = None,
+    ) -> str:
         """
-        Load bookings for the CURRENT customer only — never expose other customers' data.
-        Phone numbers are masked in the AI context.
+        Load bookings for the current customer — or a specific verified booking.
+        Phone/email are NEVER exposed in AI context (privacy).
+        Only shown after identity is verified.
         """
         if db is None:
             return ""
         try:
-            from sqlalchemy import select, desc
+            from sqlalchemy import select, desc, or_
             from app.models.booking import Booking
-            query = select(Booking).order_by(desc(Booking.created_at)).limit(10)
-            if customer_id:
-                query = query.where(Booking.customer_id == customer_id)
-            else:
-                return ""   # No customer_id → never show any bookings
-            result = await db.execute(query)
-            bookings = result.scalars().all()
+            bookings = []
+
+            # If a specific shipment was verified, always include it (real-time from DB)
+            if verified_ref:
+                vres = await db.execute(
+                    select(Booking).where(Booking.reference == verified_ref)
+                )
+                vbk = vres.scalar_one_or_none()
+                if vbk:
+                    bookings.append(vbk)
+
+            # Also include all bookings belonging to this customer (if logged in)
+            if customer_id and customer_id != 1:  # 1 = guest
+                query = (
+                    select(Booking)
+                    .where(Booking.customer_id == customer_id)
+                    .order_by(desc(Booking.created_at))
+                    .limit(5)
+                )
+                result = await db.execute(query)
+                for b in result.scalars().all():
+                    if not any(x.reference == b.reference for x in bookings):
+                        bookings.append(b)
+
             if not bookings:
                 return ""
-            lines = ["", "### حجوزاتك الأخيرة (Real-time — مرئية لك فقط):"]
+
+            lines = ["", "### تفاصيل الشحنة (Real-time من قاعدة البيانات):"]
             for b in bookings:
                 lines.append(f"- {b.to_ai_context(mask_phone=True)}")
             return "\n".join(lines)
@@ -468,8 +519,26 @@ Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-
                 detected_language=detected_lang
             )
 
-        recent_bookings_text = await self._load_recent_bookings(db=db, customer_id=customer_context.get("customer_id"))
-        system_prompt = self._build_system_prompt(customer_context, detected_lang, recent_bookings_text)
+        # ── Identity Verification Check ───────────────────────────────────────
+        # Scan conversation history for a verified tag injected by the chat endpoint
+        identity_verified = False
+        verified_ref = None
+        if conversation_history:
+            for msg in conversation_history:
+                content = msg.get("content", "")
+                if "[VERIFIED:" in content:
+                    identity_verified = True
+                    try:
+                        verified_ref = content.split("[VERIFIED:")[1].split("]")[0].strip()
+                    except Exception:
+                        pass
+
+        recent_bookings_text = await self._load_recent_bookings(
+            db=db,
+            customer_id=customer_context.get("customer_id"),
+            verified_ref=verified_ref if identity_verified else None,
+        )
+        system_prompt = self._build_system_prompt(customer_context, detected_lang, recent_bookings_text, identity_verified)
 
         ai_content = None
         tokens_used = 0

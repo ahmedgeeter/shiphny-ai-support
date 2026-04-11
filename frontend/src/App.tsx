@@ -105,16 +105,16 @@ const VALIDATORS = {
   },
 }
 
-type FormFields = { name: string; phone: string; pickup: string; delivery: string; weight: string; notes: string }
+type FormFields = { name: string; phone: string; email: string; pickup: string; delivery: string; weight: string; notes: string }
 type FieldErrors = Partial<Record<keyof FormFields, string>>
 
 /* ── Field (module-level so React never remounts inputs) ── */
 function BookingField({
-  id, label, tip, type = 'text', rows,
+  id, label, tip, type = 'text', rows, optional,
   value, onChange, onBlur, error,
   isRtl, touched, lang,
 }: {
-  id: keyof FormFields; label: string; tip?: string; type?: string; rows?: number
+  id: keyof FormFields; label: string; tip?: string; type?: string; rows?: number; optional?: boolean
   value: string; onChange: (v: string) => void; onBlur: () => void; error?: string
   isRtl: boolean; touched: Partial<Record<keyof FormFields, boolean>>; lang: Language
 }) {
@@ -136,7 +136,12 @@ function BookingField({
           <AlertCircle className="w-3 h-3 flex-shrink-0" />{error}
         </p>
       )}
-      {!error && tip && touched[id] && value && (
+      {optional && !touched[id] && (
+        <p className={`mt-1 text-xs text-blue-500 ${isRtl ? 'text-right' : 'text-left'}`}>
+          {lang === 'ar' ? '(اختياري — للتحقق من الهوية بالبريد الإلكتروني)' : '(Optional — for email identity verification)'}
+        </p>
+      )}
+  {!error && tip && touched[id] && value && (
         <p className="mt-1 text-xs text-green-600 flex items-center gap-1">
           <CheckCircle2 className="w-3 h-3 flex-shrink-0" />{lang === 'ar' ? 'صحيح ✓' : 'Valid ✓'}
         </p>
@@ -148,7 +153,7 @@ function BookingField({
 /* ── Booking Modal ── */
 function BookingModal({ service, lang, onClose }: { service: string; lang: Language; onClose: () => void }) {
   const [step, setStep] = useState(1)
-  const [form, setForm] = useState<FormFields>({ name: '', phone: '', pickup: '', delivery: '', weight: '', notes: '' })
+  const [form, setForm] = useState<FormFields>({ name: '', phone: '', email: '', pickup: '', delivery: '', weight: '', notes: '' })
   const [errors, setErrors] = useState<FieldErrors>({})
   const [touched, setTouched] = useState<Partial<Record<keyof FormFields, boolean>>>({})
   const [submitting, setSubmitting] = useState(false)
@@ -159,10 +164,11 @@ function BookingModal({ service, lang, onClose }: { service: string; lang: Langu
   const L = {
     ar: {
       title: 'حجز شحنة جديدة', step1: 'بيانات المرسل', step2: 'تفاصيل الشحنة',
-      name: 'الاسم الكامل *', phone: 'رقم الهاتف *',
+      name: 'الاسم الكامل *', phone: 'رقم الهاتف *', email: 'البريد الإلكتروني',
       pickup: 'عنوان الاستلام *', delivery: 'عنوان التوصيل *',
       weight: 'الوزن التقريبي (كجم)', notes: 'ملاحظات إضافية',
       phoneTip: 'مثال: 01012345678',
+      emailTip: 'مثال: ahmed@gmail.com',
       pickupTip: 'مثال: ٢٥ شارع التحرير، وسط البلد، القاهرة',
       deliveryTip: 'مثال: ٥ شارع النصر، المعادي، القاهرة',
       next: 'التالي ←', back: '→ رجوع', confirm: 'تأكيد الحجز',
@@ -175,10 +181,11 @@ function BookingModal({ service, lang, onClose }: { service: string; lang: Langu
     },
     en: {
       title: 'New Shipment Booking', step1: 'Sender Details', step2: 'Shipment Details',
-      name: 'Full Name *', phone: 'Phone Number *',
+      name: 'Full Name *', phone: 'Phone Number *', email: 'Email Address',
       pickup: 'Pickup Address *', delivery: 'Delivery Address *',
       weight: 'Estimated Weight (kg)', notes: 'Additional Notes',
       phoneTip: 'e.g. 01012345678',
+      emailTip: 'e.g. ahmed@gmail.com',
       pickupTip: 'e.g. 25 Tahrir Street, Downtown, Cairo',
       deliveryTip: 'e.g. 5 Al-Nasr Street, Maadi, Cairo',
       next: 'Next →', back: '← Back', confirm: 'Confirm Booking',
@@ -202,7 +209,7 @@ function BookingModal({ service, lang, onClose }: { service: string; lang: Langu
 
   // Validate all fields for a given step
   const validateStep = (s: number): boolean => {
-    const fields: (keyof FormFields)[] = s === 1 ? ['name', 'phone'] : ['pickup', 'delivery', 'weight']
+    const fields: (keyof FormFields)[] = s === 1 ? ['name', 'phone'] : ['pickup', 'delivery', 'weight'] // email is optional
     const newErrors: FieldErrors = { ...errors }
     const newTouched: Partial<Record<keyof FormFields, boolean>> = { ...touched }
     let valid = true
@@ -248,6 +255,7 @@ function BookingModal({ service, lang, onClose }: { service: string; lang: Langu
         body: JSON.stringify({
           sender_name:      form.name.trim(),
           sender_phone:     form.phone.trim(),
+          sender_email:     form.email.trim() || null,
           pickup_address:   form.pickup.trim(),
           delivery_address: form.delivery.trim(),
           service_type:     service,
@@ -347,6 +355,9 @@ function BookingModal({ service, lang, onClose }: { service: string; lang: Langu
                         isRtl={isRtl} touched={touched} lang={lang} />
                       <BookingField id="phone" label={l.phone} tip={l.phoneTip} type="tel"
                         value={form.phone} onChange={v => handleChange('phone', v)} onBlur={() => handleBlur('phone')} error={errors.phone}
+                        isRtl={isRtl} touched={touched} lang={lang} />
+                      <BookingField id="email" label={l.email} tip={l.emailTip} type="email" optional
+                        value={form.email} onChange={v => handleChange('email', v)} onBlur={() => handleBlur('email')} error={errors.email}
                         isRtl={isRtl} touched={touched} lang={lang} />
                     </>
                   )}

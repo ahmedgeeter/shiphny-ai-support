@@ -8,6 +8,8 @@ from time import time as _time
 from typing import Optional
 from uuid import uuid4
 
+import re
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import select, desc
@@ -151,14 +153,83 @@ async def chat(
         select(Message)
         .where(Message.conversation_id == conversation.id)
         .order_by(desc(Message.created_at))
-        .limit(10)
+        .limit(20)
     )
     history = result.scalars().all()
     history_list = [
         {"role": msg.role.value, "content": msg.content}
         for msg in reversed(history)
     ]
-    
+
+    # ── Auto Identity Verification ────────────────────────────────────────────
+    # Scan the last few messages for a pending verification context:
+    # If the AI asked for identity and the user just replied with a value,
+    # automatically call /api/bookings/verify-identity and inject [VERIFIED:ref].
+    auto_verified_inject = None
+    already_verified = any("[VERIFIED:" in m.get("content", "") for m in history_list)
+
+    if not already_verified and len(history_list) >= 2:
+        # Find a pending SH- reference in recent AI messages
+        pending_ref = None
+        for msg in reversed(history_list[-6:]):
+            if msg["role"] == "assistant":
+                found = re.findall(r'SH-\d{8}', msg["content"])
+                if found:
+                    pending_ref = found[0]
+                    break
+
+        if pending_ref:
+            user_val = request.message.strip()
+            # Detect method from user input
+            method = None
+            if "@" in user_val and "." in user_val:
+                method = "email"
+            elif user_val.replace(" ", "").isdigit() and len(user_val.replace(" ", "")) <= 6:
+                method = "phone_last4"
+            elif len(user_val.split()) >= 2:
+                method = "name"
+            elif user_val.replace(" ", "").isdigit():
+                method = "phone_last4"
+
+            if method:
+                try:
+                    from sqlalchemy import select as _select
+                    from app.models.booking import Booking as _Booking
+                    _bres = await db.execute(
+                        _select(_Booking).where(_Booking.reference == pending_ref)
+                    )
+                    _bk = _bres.scalar_one_or_none()
+                    if _bk:
+                        _verified = False
+                        if method == "phone_last4":
+                            _digits = "".join(c for c in _bk.sender_phone if c.isdigit())
+                            _verified = _digits[-4:] == user_val.replace(" ", "")[-4:]
+                        elif method == "name":
+                            _stored = _bk.sender_name.strip().lower().split()
+                            _input = user_val.lower().split()
+                            _n = min(2, len(_stored))
+                            _verified = _stored[:_n] == _input[:_n]
+                        elif method == "email":
+                            if _bk.sender_email:
+                                _verified = _bk.sender_email.strip().lower() == user_val.lower()
+                        if _verified:
+                            auto_verified_inject = f"[VERIFIED:{pending_ref}]"
+                            print(f"[Chat] Auto-verified {pending_ref} via {method}")
+                except Exception as _e:
+                    print(f"[Chat] Auto-verify failed: {_e}")
+
+    # Inject verification tag into history AND persist it to DB so it survives future requests
+    if auto_verified_inject:
+        history_list.append({"role": "system", "content": auto_verified_inject})
+        # Persist as a system message so AI remembers verification across requests
+        verified_msg = Message(
+            conversation_id=conversation.id,
+            role=MessageRole.SYSTEM,
+            content=auto_verified_inject,
+        )
+        db.add(verified_msg)
+        await db.flush()
+
     # Prepare customer context with language from request
     preferred_lang = request.language or (customer.preferred_language.value if customer.preferred_language else "ar")
 
