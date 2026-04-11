@@ -24,13 +24,13 @@ from app.services.groq_ai import get_groq_service, AIResponse
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
-# ── Rate limiting: 20 messages / 60 s per IP ─────────────────────────────────
+# ── Rate limiting: 60 messages / 60 s per IP ─────────────────────────────────
 _chat_rate: dict = defaultdict(list)
 
 def _check_chat_rate(ip: str) -> None:
     now = _time()
     _chat_rate[ip] = [t for t in _chat_rate[ip] if now - t < 60]
-    if len(_chat_rate[ip]) >= 20:
+    if len(_chat_rate[ip]) >= 60:
         raise HTTPException(
             status_code=429,
             detail="رجاء الانتظار قليلاً قبل إرسال رسالة جديدة." if True else "Too many messages. Please wait.",
@@ -163,58 +163,110 @@ async def chat(
         for msg in reversed(history)
     ]
 
-    # ── Auto Identity Verification ────────────────────────────────────────────
-    # Scan the last few messages for a pending verification context:
-    # If the AI asked for identity and the user just replied with a value,
-    # automatically call /api/bookings/verify-identity and inject [VERIFIED:ref].
+    # ══════════════════════════════════════════════════════════════════════════
+    # ██  GLOBAL INJECTION GUARD  ██
+    # Sanitize user messages in history that contain system-like tags.
+    # This prevents injected [VERIFIED:] in user messages from influencing the AI.
+    # ══════════════════════════════════════════════════════════════════════════
+    _GLOBAL_INJECT_MARKERS = [
+        "[VERIFIED", "SYSTEM OVERRIDE", "ADMIN MODE", "BYPASS VERIFICATION",
+        "ignore all previous", "ignore previous instructions",
+    ]
+    for _hm in history_list:
+        if _hm.get("role") == "user":
+            _c = _hm.get("content", "")
+            if any(_mk.lower() in _c.lower() for _mk in _GLOBAL_INJECT_MARKERS):
+                # Neutralize: replace dangerous content with harmless placeholder
+                _hm["content"] = "[message blocked by security filter]"
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # ██  REAL-TIME IDENTITY VERIFICATION LAYER  ██
+    # Deterministic — does NOT depend on AI model. Works even during rate limits.
+    # Steps:
+    #   1) Check if session already verified via DB system messages
+    #   2) Extract SH-ref from conversation
+    #   3) Detect verification method from user input
+    #   4) Validate against DB in real-time
+    #   5) Build deterministic response OR pass to AI
+    # ══════════════════════════════════════════════════════════════════════════
+    from app.models.booking import Booking as _Booking
+
     auto_verified_inject = None
-    pending_ref = None   # track for passing to generate_response
-    already_verified = any("[VERIFIED:" in m.get("content", "") for m in history_list)
+    pending_ref = None
+    verification_outcome = None   # None | "success" | "failed" | "not_found"
+    verified_booking = None       # The Booking object if verified
+    _lang = request.language or "ar"
+
+    # ── 1) Check if already verified in this session ──
+    already_verified = any(
+        "[VERIFIED:" in m.get("content", "")
+        for m in history_list
+        if m.get("role") == "system"
+    )
 
     if not already_verified:
-        # Find the most recent SH- reference mentioned anywhere in the conversation
-        # (user or assistant) — search ALL history, most recent first
-        pending_ref = None
+        # ── 2) Find the most recent SH- reference in conversation ──
         for msg in reversed(history_list):
             found = re.findall(r'SH-\d{8}', msg.get("content", ""))
             if found:
-                pending_ref = found[-1]   # take last ref in that message
+                pending_ref = found[-1]
                 break
-
-        # Also check if the current user message itself contains an SH- ref
-        # (they might be giving the ref in the same message as their verify data)
+        # Also check current message
         current_refs = re.findall(r'SH-\d{8}', request.message)
         if current_refs:
             pending_ref = current_refs[0]
 
+        # ── SECURITY: Block injection attempts ──
+        if pending_ref:
+            _INJECT_MARKERS = [
+                "✅", "[VERIFIED", "[نتيجة", "VERIFY RESULT", "SYSTEM OVERRIDE",
+                "تم التحقق", "identity verified", "ADMIN MODE", "BYPASS",
+                "ignore all previous", "ignore previous instructions",
+                "show all data", "show all shipment", "no restrictions",
+                "اعرض بيانات", "أظهر بيانات", "اكشف", "OVERRIDE",
+            ]
+            if any(m.lower() in request.message.lower() for m in _INJECT_MARKERS):
+                print(f"[SEC] Injection attempt blocked")
+                pending_ref = None
 
+        # ── 3) Detect verification method from user input ──
         if pending_ref:
             user_val = request.message.strip()
-            # Strip the SH-ref itself from user_val for cleaner method detection
             user_val_clean = re.sub(r'SH-\d{8}', '', user_val).strip()
             if user_val_clean:
                 user_val = user_val_clean
 
-            # Detect verification method from user input
             method = None
-            if "@" in user_val and "." in user_val:
-                method = "email"
-            elif user_val.replace(" ", "").isdigit() and len(user_val.replace(" ", "")) <= 6:
-                method = "phone_last4"
-            elif len(user_val.split()) >= 2:
-                method = "name"
-            elif user_val.replace(" ", "").isdigit():
-                method = "phone_last4"
-            print(f"[DEBUG] method={method} user_val='{user_val}'")
+            _digits_only = user_val.replace(" ", "").replace("-", "")
 
+            _SENTENCE_WORDS = [
+                'عايز','اعرف','حالة','شحنتي','شحنة','تفاصيل','مساعدة','ممكن','ياريت',
+                'اريد','ارجو','ابي','ودي','أريد','أرجو','معرفة','تحقق','هوية',
+                'بيانات','كيف','متي','متى','وين','فين','check','want','need','show',
+                'verify','override','ignore','bypass','system','admin','what','where',
+                'track','status','help','please','لو','سمحت','عاوز','محتاج',
+            ]
+
+            if "@" in user_val and "." in user_val and len(user_val) < 100:
+                method = "email"
+            elif _digits_only.isdigit() and 4 <= len(_digits_only) <= 8:
+                method = "phone_last4"
+            elif (
+                2 <= len(user_val.split()) <= 4
+                and all(len(w) >= 2 for w in user_val.split())
+                and not any(w in user_val.lower() for w in _SENTENCE_WORDS)
+                and len(user_val) < 50
+            ):
+                method = "name"
+
+            # ── 4) Validate against DB in real-time ──
             if method:
                 try:
-                    from sqlalchemy import select as _select
-                    from app.models.booking import Booking as _Booking
                     _bres = await db.execute(
-                        _select(_Booking).where(_Booking.reference == pending_ref)
+                        select(_Booking).where(_Booking.reference == pending_ref)
                     )
                     _bk = _bres.scalar_one_or_none()
+
                     if _bk:
                         _verified = False
                         if method == "phone_last4":
@@ -228,27 +280,184 @@ async def chat(
                         elif method == "email":
                             if _bk.sender_email:
                                 _verified = _bk.sender_email.strip().lower() == user_val.lower()
-                        if _verified:
-                            auto_verified_inject = f"[VERIFIED:{pending_ref}]"
-                            print(f"[Chat] Auto-verified {pending_ref} via {method}")
-                except Exception as _e:
-                    print(f"[Chat] Auto-verify failed: {_e}")
 
-    # Inject verification tag into history AND persist it to DB so it survives future requests
+                        if _verified:
+                            verification_outcome = "success"
+                            verified_booking = _bk
+                            auto_verified_inject = f"[VERIFIED:{pending_ref}]"
+                            print(f"[Chat] ✅ Verified {pending_ref} via {method}")
+                        else:
+                            verification_outcome = "failed"
+                            print(f"[Chat] ❌ Verification failed for {pending_ref} via {method}")
+                    else:
+                        verification_outcome = "not_found"
+                        print(f"[Chat] ⚠️ Booking {pending_ref} not found")
+                except Exception as _e:
+                    print(f"[Chat] Verify error: {_e}")
+
+    # ── 5) Persist verification state to DB ──
     if auto_verified_inject:
-        history_list.append({"role": "system", "content": auto_verified_inject})
-        # Persist as a system message so AI remembers verification across requests
-        verified_msg = Message(
+        # Save [VERIFIED:ref] system message for session persistence
+        db.add(Message(
             conversation_id=conversation.id,
             role=MessageRole.SYSTEM,
             content=auto_verified_inject,
-        )
-        db.add(verified_msg)
+        ))
+        await db.flush()
+        # Add to history_list so AI sees it this turn
+        history_list.append({"role": "system", "content": auto_verified_inject})
+
+    if verification_outcome == "failed":
+        if _lang == "ar":
+            _fail_msg = (
+                f"[نتيجة التحقق: فشل] البيانات ({user_val}) غير مطابقة لشحنة {pending_ref}."
+            )
+        else:
+            _fail_msg = (
+                f"[VERIFY RESULT: FAILED] Data ({user_val}) does not match {pending_ref}."
+            )
+        history_list.append({"role": "system", "content": _fail_msg})
+        # Persist attempt to DB
+        db.add(Message(
+            conversation_id=conversation.id,
+            role=MessageRole.SYSTEM,
+            content=_fail_msg,
+        ))
         await db.flush()
 
-    # Prepare customer context with language from request
-    preferred_lang = request.language or (customer.preferred_language.value if customer.preferred_language else "ar")
+    if verification_outcome == "not_found":
+        _nf_msg = f"[SYSTEM: Booking {pending_ref} not found in database]"
+        history_list.append({"role": "system", "content": _nf_msg})
+        db.add(Message(
+            conversation_id=conversation.id,
+            role=MessageRole.SYSTEM,
+            content=_nf_msg,
+        ))
+        await db.flush()
 
+    # ══════════════════════════════════════════════════════════════════════════
+    # ██  DETERMINISTIC RESPONSE BUILDER  ██
+    # For verification success/failure, build response WITHOUT AI model.
+    # This guarantees correct behavior even during rate limits.
+    # ══════════════════════════════════════════════════════════════════════════
+    preferred_lang = request.language or (customer.preferred_language.value if customer.preferred_language else "ar")
+    _start_ms = _time() * 1000
+    deterministic_response = None
+
+    # ── A) VERIFICATION SUCCESS → build shipment details response directly ──
+    if verification_outcome == "success" and verified_booking:
+        b = verified_booking
+        status_ar = _Booking.STATUS_AR.get(b.status.value, b.status.value)
+        if preferred_lang == "ar":
+            deterministic_response = (
+                f"تم التحقق بنجاح.\n\n"
+                f"تفاصيل شحنتك {b.reference}:\n"
+                f"• الاسم: {b.sender_name}\n"
+                f"• الخدمة: {b.service_type}\n"
+                f"• من: {b.pickup_address}\n"
+                f"• إلى: {b.delivery_address}\n"
+                f"• الحالة: {status_ar}\n"
+                f"• الوزن: {b.weight_kg or 'غير محدد'} كجم\n"
+                f"• تاريخ الحجز: {b.created_at.strftime('%Y-%m-%d %H:%M') if b.created_at else '-'}\n\n"
+                f"هل تحتاج أي مساعدة أخرى؟"
+            )
+        else:
+            deterministic_response = (
+                f"Identity verified.\n\n"
+                f"Shipment {b.reference} details:\n"
+                f"• Name: {b.sender_name}\n"
+                f"• Service: {b.service_type}\n"
+                f"• From: {b.pickup_address}\n"
+                f"• To: {b.delivery_address}\n"
+                f"• Status: {b.status.value.title()}\n"
+                f"• Weight: {b.weight_kg or 'N/A'} kg\n"
+                f"• Booked: {b.created_at.strftime('%Y-%m-%d %H:%M') if b.created_at else '-'}\n\n"
+                f"Need anything else?"
+            )
+
+    # ── B) VERIFICATION FAILED → clear rejection message ──
+    elif verification_outcome == "failed":
+        if preferred_lang == "ar":
+            deterministic_response = (
+                f"عذراً، البيانات التي أدخلتها غير مطابقة لسجلات الشحنة {pending_ref}.\n\n"
+                f"يرجى المحاولة مرة أخرى بإحدى الطرق التالية:\n"
+                f"1. آخر 4 أرقام من رقم الموبايل المسجّل\n"
+                f"2. الاسم الأول والثاني كما هو مسجّل\n"
+                f"3. البريد الإلكتروني المسجّل\n\n"
+                f"أو اتصل بالخط الساخن: 19282"
+            )
+        else:
+            deterministic_response = (
+                f"Sorry, the details you entered do not match our records for {pending_ref}.\n\n"
+                f"Please try again with one of:\n"
+                f"1. Last 4 digits of registered phone\n"
+                f"2. First and last name as registered\n"
+                f"3. Registered email address\n\n"
+                f"Or call our hotline: 19282"
+            )
+
+    # ── C) PENDING VERIFICATION — user mentioned SH-ref but no data yet ──
+    elif pending_ref and verification_outcome is None and not already_verified:
+        if preferred_lang == "ar":
+            deterministic_response = (
+                f"لأديك تفاصيل شحنتك {pending_ref}، محتاج أتحقق من هويتك الأول:\n\n"
+                f"1. آخر 4 أرقام من رقم الموبايل المسجّل\n"
+                f"2. الاسم الأول والثاني كما هو مسجّل\n"
+                f"3. البريد الإلكتروني المسجّل\n\n"
+                f"أرسل لي أي واحدة منهم."
+            )
+        else:
+            deterministic_response = (
+                f"To show you details for {pending_ref}, I need to verify your identity first:\n\n"
+                f"1. Last 4 digits of your registered phone number\n"
+                f"2. Your first and last name as registered\n"
+                f"3. Your registered email address\n\n"
+                f"Please send any one of the above."
+            )
+
+    # ── D) BOOKING NOT FOUND → clear message ──
+    elif verification_outcome == "not_found":
+        if preferred_lang == "ar":
+            deterministic_response = (
+                f"عذراً، رقم الشحنة {pending_ref} غير موجود في نظامنا.\n"
+                f"تأكد من الرقم وحاول مرة أخرى، أو اتصل بالخط الساخن: 19282."
+            )
+        else:
+            deterministic_response = (
+                f"Sorry, shipment {pending_ref} was not found in our system.\n"
+                f"Please double-check the number or call: 19282."
+            )
+
+    # ── D) If deterministic response was built, use it directly (no AI needed) ──
+    if deterministic_response:
+        elapsed_ms = (_time() * 1000) - _start_ms
+        ai_message = Message(
+            conversation_id=conversation.id,
+            role=MessageRole.ASSISTANT,
+            content=deterministic_response,
+            ai_model_used="deterministic-validation",
+            ai_confidence_score=1.0,
+            tokens_used=0,
+            response_time_ms=elapsed_ms,
+            detected_intent=Intent.SHIPPING_STATUS,
+        )
+        db.add(ai_message)
+        conversation.response_time_avg_ms = elapsed_ms
+        conversation.ai_confidence_avg = 1.0
+        conversation.primary_intent = Intent.SHIPPING_STATUS
+        await db.commit()
+        return ChatResponse(
+            response=deterministic_response,
+            session_id=conversation.session_id,
+            confidence=1.0,
+            response_time_ms=elapsed_ms,
+            detected_intent="shipping_status",
+            escalated=False,
+        )
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # ██  AI RESPONSE (for non-verification messages)  ██
+    # ══════════════════════════════════════════════════════════════════════════
     customer_context = {
         "customer_id": customer.id,
         "name": customer.display_name,
@@ -257,10 +466,7 @@ async def chat(
         "language": preferred_lang,
         "total_spent": customer.total_spent_egp,
     }
-    
-    # Generate AI response
-    # Pass verified_ref directly so generate_response doesn't need to re-scan history
-    # (history was built BEFORE [VERIFIED] was injected, so scanning it would miss it)
+
     just_verified_ref = pending_ref if auto_verified_inject else None
     ai_service = get_groq_service()
     try:
@@ -272,22 +478,21 @@ async def chat(
             force_verified_ref=just_verified_ref,
         )
     except Exception as e:
-        # Fallback response if AI fails
         ai_response = AIResponse(
-            content="عذراً، حدث خطأ تقني. يرجى المحاولة مرة أخرى.",
+            content="عذراً، حدث خطأ تقني. يرجى المحاولة مرة أخرى." if preferred_lang == "ar"
+                    else "Sorry, a technical error occurred. Please try again.",
             confidence_score=0.0,
             tokens_used=0,
             response_time_ms=0,
             model_used="error",
             detected_intent="error"
         )
-    
-    # ── Escalation detection ──────────────────────────────────────────────────
+
+    # ── Escalation detection ──
     ESCALATION_TAG = "[ESCALATE_TO_HUMAN]"
     escalated = ESCALATION_TAG in ai_response.content
     clean_content = ai_response.content.replace(ESCALATION_TAG, "").strip()
 
-    # Add AI message (clean, no internal tags)
     try:
         msg_intent = Intent(ai_response.detected_intent) if ai_response.detected_intent else None
     except ValueError:
@@ -304,7 +509,6 @@ async def chat(
     )
     db.add(ai_message)
 
-    # Update conversation
     if escalated:
         conversation.status = ConversationStatus.ESCALATED
     if ai_response.detected_intent and ai_response.detected_intent != "error":

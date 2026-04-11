@@ -1,8 +1,6 @@
-# Environment
+# Environment (secrets)
 .env
 .env.local
-.env.production
-.env.development
 backend/.env
 
 # Python
