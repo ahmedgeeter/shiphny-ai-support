@@ -26,26 +26,71 @@ class AIResponse:
 
 
 # ─── Knowledge Base for Shiphny Express ───
-KNOWLEDGE_BASE_AR = """شحني Express | خط ساخن: 19282 | واتساب: 01001928200 | تتبع: shiphny.com/track
-أسعار: القاهرة 35/45ج | الإسكندرية والدلتا 40/55ج | الصعيد 50/70ج | الحدود 60/85ج (قياسي/سريع)
-تغطية: 27 محافظة - القاهرة/الجيزة/القليوبية/الإسكندرية/البحيرة/الغربية/المنوفية/الدقهلية/دمياط/الفيوم/بني سويف/المنيا/أسيوط/سوهاج/قنا/الأقصر/أسوان/بورسعيد/الإسماعيلية/السويس/مطروح/البحر الأحمر/سيناء/كفر الشيخ/الوادي الجديد/شرم الشيخ/الغردقة
-مواعيد: القاهرة نفس اليوم (قبل 12ظ) | الدلتا 1-2يوم | الصعيد 2-3أيام | الحدود 3-5أيام | لا توصيل الجمعة
-إرجاع: 14 يوم من الاستلام | استرداد 3-5 أيام | مجاني لعيوب المصنع | 15ج للرفض بدون سبب
-تأمين: مجاني حتى 2000ج | ممتد حتى 50000ج (1% من القيمة)
-دفع: كاش/COD/فودافون كاش/فيزا/فوري
-شحنات الشركات: خصم 40% | من 25ج/شحنة | مدير حساب مخصص
-التتبع: رقم الشحنة يبدأ بـ SH- متبوع 8 أرقام
+KNOWLEDGE_BASE_AR = """
+=== شحني Express — شركة الشحن الرائدة في مصر ===
+الخط الساخن: 19282 | واتساب: 01001928200 | تتبع: shiphny.com/track | 24/7
+تأسست 2019 | 500+ موظف | 200+ سيارة | 15 مركز فرز
+
+--- أسعار الشحن لكل محافظة (قياسي/سريع بالجنيه) ---
+القاهرة: 35/45 | الجيزة: 35/45 | القليوبية: 35/45
+الإسكندرية: 40/55 | البحيرة: 40/55 | كفر الشيخ: 40/55
+الغربية: 40/55 | المنوفية: 40/55 | الدقهلية: 40/55 | دمياط: 40/55
+الفيوم: 50/70 | بني سويف: 50/70 | المنيا: 50/70
+أسيوط: 50/70 | سوهاج: 50/70 | قنا: 50/70 | الأقصر: 50/70 | أسوان: 50/70
+بورسعيد: 40/55 | الإسماعيلية: 40/55 | السويس: 40/55
+مطروح: 60/85 | البحر الأحمر (الغردقة/سفاجا): 60/85
+جنوب سيناء (شرم الشيخ): 60/85 | شمال سيناء (العريش): 60/85
+الوادي الجديد: 60/85
+شحن مجاني للطلبات فوق 500ج (القاهرة فقط) | الشركات من 25ج/شحنة
+
+--- أوقات التوصيل ---
+القاهرة/الجيزة/القليوبية: نفس اليوم لو قبل 12ظ وإلا اليوم التالي
+الدلتا والقناة: 1-2 يوم عمل | الصعيد: 2-3 أيام | الحدود: 3-5 أيام
+لا توصيل الجمعة
+
+--- خدمات ---
+تتبع: رقم SH- + 8 أرقام | عبر shiphny.com/track أو 19282 أو واتساب
+تأمين: مجاني حتى 2000ج | ممتد حتى 50000ج بإضافة 1%
+إرجاع: خلال 14 يوم | استرداد 3-5 أيام | مجاني لعيوب المصنع | 15ج للرفض بدون سبب
+دفع: كاش/COD/فودافون كاش/فيزا/ماستركارد/فوري/مصاري/تحويل بنكي
+شحنة تالفة: اتصل خلال 24ساعة بصور | شحنة مفقودة: تعويض خلال 7 أيام
+عنوان خاطئ: عدّل قبل خروج الشحنة عبر 19282 | رفض الاستلام: إعادة توصيل مجانية
+الشركات: خصم 40% | مدير حساب | API | فواتير شهرية | لا حد أدنى للشحنات
+شحن دولي: لا تشحن لخارج مصر | داخل مصر فقط
+طرود: لا تستقبل طرود من خارج مصر حالياً
 """
 
-KNOWLEDGE_BASE_EN = """Shiphny Express | Hotline: 19282 | WhatsApp: 01001928200 | Track: shiphny.com/track
-Prices: Cairo 35/45 EGP | Alexandria&Delta 40/55 | Upper Egypt 50/70 | Border 60/85 (standard/express)
-Coverage: All 27 Egyptian governorates including Cairo, Alexandria, Aswan, Sharm, Hurghada, Sinai
-Delivery: Cairo same-day (before 12PM) | Delta 1-2 days | Upper Egypt 2-3 days | Border 3-5 days | No Friday delivery
-Returns: 14 days | Refund 3-5 days | Free for defects | 15 EGP fee for no-reason refusal
-Insurance: Free up to 2000 EGP | Extended up to 50,000 EGP (1% of value)
-Payment: Cash/COD/Vodafone Cash/Visa/Fawry
-Business: 40% discount | from 25 EGP/shipment | dedicated account manager
-Tracking number: starts with SH- followed by 8 digits
+KNOWLEDGE_BASE_EN = """
+=== Shiphny Express — Egypt's Leading Shipping Company ===
+Hotline: 19282 | WhatsApp: 01001928200 | Track: shiphny.com/track | 24/7
+Founded 2019 | 500+ staff | 200+ vehicles | 15 sorting centers
+
+--- Prices per Governorate (Standard/Express EGP) ---
+Cairo: 35/45 | Giza: 35/45 | Qalyubia: 35/45
+Alexandria: 40/55 | Beheira: 40/55 | Kafr El Sheikh: 40/55
+Gharbia: 40/55 | Monufia: 40/55 | Dakahlia: 40/55 | Damietta: 40/55
+Fayoum: 50/70 | Beni Suef: 50/70 | Minya: 50/70
+Assiut: 50/70 | Sohag: 50/70 | Qena: 50/70 | Luxor: 50/70 | Aswan: 50/70
+Port Said: 40/55 | Ismailia: 40/55 | Suez: 40/55
+Matrouh: 60/85 | Red Sea (Hurghada/Safaga): 60/85
+South Sinai (Sharm El Sheikh): 60/85 | North Sinai (Arish): 60/85
+New Valley: 60/85
+Free shipping over EGP 500 (Cairo only) | Business from EGP 25/shipment
+
+--- Delivery Times ---
+Cairo/Giza/Qalyubia: Same day if before 12PM, else next day
+Delta & Canal: 1-2 business days | Upper Egypt: 2-3 days | Border: 3-5 days
+No Friday deliveries
+
+--- Services ---
+Tracking: SH- + 8 digits | Via website, hotline or WhatsApp
+Insurance: Free up to 2000 EGP | Extended up to 50,000 EGP (+1%)
+Returns: 14 days | Refund 3-5 days | Free for defects | 15 EGP refused delivery fee
+Payment: Cash/COD/Vodafone Cash/Visa/Mastercard/Fawry/Bank Transfer
+Damaged shipment: Contact within 24hrs with photos | Lost: compensation within 7 days
+Wrong address: Fix before dispatch via 19282 | Refused: 1 free re-delivery
+Business: 40% discount | Account manager | API | Monthly invoices | No minimum
+International: Domestic Egypt only — no international shipping
 """
 
 
