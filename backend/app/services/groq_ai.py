@@ -27,70 +27,253 @@ class AIResponse:
 
 # ─── Knowledge Base for Shiphny Express ───
 KNOWLEDGE_BASE_AR = """
-=== شحني Express — شركة الشحن الرائدة في مصر ===
-الخط الساخن: 19282 | واتساب: 01001928200 | تتبع: shiphny.com/track | 24/7
-تأسست 2019 | 500+ موظف | 200+ سيارة | 15 مركز فرز
+╔══════════════════════════════════════════════════════╗
+   شحني Express — شركة الشحن والتوصيل الرائدة في مصر
+╚══════════════════════════════════════════════════════╝
 
---- أسعار الشحن لكل محافظة (قياسي/سريع بالجنيه) ---
-القاهرة: 35/45 | الجيزة: 35/45 | القليوبية: 35/45
-الإسكندرية: 40/55 | البحيرة: 40/55 | كفر الشيخ: 40/55
-الغربية: 40/55 | المنوفية: 40/55 | الدقهلية: 40/55 | دمياط: 40/55
-الفيوم: 50/70 | بني سويف: 50/70 | المنيا: 50/70
-أسيوط: 50/70 | سوهاج: 50/70 | قنا: 50/70 | الأقصر: 50/70 | أسوان: 50/70
-بورسعيد: 40/55 | الإسماعيلية: 40/55 | السويس: 40/55
-مطروح: 60/85 | البحر الأحمر (الغردقة/سفاجا): 60/85
-جنوب سيناء (شرم الشيخ): 60/85 | شمال سيناء (العريش): 60/85
-الوادي الجديد: 60/85
-شحن مجاني للطلبات فوق 500ج (القاهرة فقط) | الشركات من 25ج/شحنة
+■ معلومات التواصل:
+- الخط الساخن: 19282 (24 ساعة / 7 أيام)
+- واتساب: 01001928200
+- الموقع: shiphny.com
+- تتبع الشحنات: shiphny.com/track
+- البريد: support@shiphny.com
+- المقر: القاهرة، مصر
 
---- أوقات التوصيل ---
-القاهرة/الجيزة/القليوبية: نفس اليوم لو قبل 12ظ وإلا اليوم التالي
-الدلتا والقناة: 1-2 يوم عمل | الصعيد: 2-3 أيام | الحدود: 3-5 أيام
-لا توصيل الجمعة
+■ نبذة عن الشركة:
+- تأسست عام 2019
+- 500+ موظف، 200+ سيارة توصيل، 15 مركز فرز
+- تخدم أكثر من 1 مليون عميل
+- تغطي جميع محافظات مصر الـ 27
+- متاحة 24/7 بدون انقطاع
 
---- خدمات ---
-تتبع: رقم SH- + 8 أرقام | عبر shiphny.com/track أو 19282 أو واتساب
-تأمين: مجاني حتى 2000ج | ممتد حتى 50000ج بإضافة 1%
-إرجاع: خلال 14 يوم | استرداد 3-5 أيام | مجاني لعيوب المصنع | 15ج للرفض بدون سبب
-دفع: كاش/COD/فودافون كاش/فيزا/ماستركارد/فوري/مصاري/تحويل بنكي
-شحنة تالفة: اتصل خلال 24ساعة بصور | شحنة مفقودة: تعويض خلال 7 أيام
-عنوان خاطئ: عدّل قبل خروج الشحنة عبر 19282 | رفض الاستلام: إعادة توصيل مجانية
-الشركات: خصم 40% | مدير حساب | API | فواتير شهرية | لا حد أدنى للشحنات
-شحن دولي: لا تشحن لخارج مصر | داخل مصر فقط
-طرود: لا تستقبل طرود من خارج مصر حالياً
+══════════════════════════════════════════
+   أسعار الشحن لكل محافظة (قياسي / سريع)
+══════════════════════════════════════════
+
+▸ القاهرة الكبرى:
+  القاهرة: 35ج / 45ج
+  الجيزة: 35ج / 45ج
+  القليوبية: 35ج / 45ج
+
+▸ منطقة الدلتا:
+  الإسكندرية: 40ج / 55ج
+  البحيرة: 40ج / 55ج
+  كفر الشيخ: 40ج / 55ج
+  الغربية (طنطا): 40ج / 55ج
+  المنوفية (شبين الكوم): 40ج / 55ج
+  الدقهلية (المنصورة): 40ج / 55ج
+  دمياط: 40ج / 55ج
+  الشرقية (الزقازيق): 40ج / 55ج
+
+▸ منطقة القناة:
+  بورسعيد: 40ج / 55ج
+  الإسماعيلية: 40ج / 55ج
+  السويس: 40ج / 55ج
+
+▸ الصعيد:
+  الفيوم: 50ج / 70ج
+  بني سويف: 50ج / 70ج
+  المنيا: 50ج / 70ج
+  أسيوط: 50ج / 70ج
+  سوهاج: 50ج / 70ج
+  قنا: 50ج / 70ج
+  الأقصر: 50ج / 70ج
+  أسوان: 50ج / 70ج
+
+▸ المحافظات الحدودية والسياحية:
+  مطروح (مرسى مطروح): 60ج / 85ج
+  البحر الأحمر (الغردقة، سفاجا، مرسى علم): 60ج / 85ج
+  جنوب سيناء (شرم الشيخ، دهب، نويبع): 60ج / 85ج
+  شمال سيناء (العريش): 60ج / 85ج
+  الوادي الجديد (الخارجة): 60ج / 85ج
+
+▸ عروض خاصة:
+  - شحن مجاني للطلبات فوق 500ج (القاهرة الكبرى فقط)
+  - الشركات: أسعار تبدأ من 25ج/شحنة حسب الحجم الشهري
+
+══════════════════════════════════════════
+   أوقات التوصيل
+══════════════════════════════════════════
+- القاهرة / الجيزة / القليوبية: نفس اليوم إذا الطلب قبل 12 ظهراً، وإلا اليوم التالي
+- الإسكندرية والدلتا والقناة: 1-2 يوم عمل
+- الصعيد (الفيوم لأسوان): 2-3 أيام عمل
+- المحافظات الحدودية والسياحية: 3-5 أيام عمل
+- لا يوجد توصيل يوم الجمعة
+- الأعياد الرسمية: قد يتأخر يوم إضافي
+
+══════════════════════════════════════════
+   تتبع الشحنات
+══════════════════════════════════════════
+- رقم التتبع: يبدأ بـ SH- متبوع بـ 8 أرقام (مثال: SH-12345678)
+- طرق التتبع:
+  1. الموقع: shiphny.com/track
+  2. الخط الساخن: 19282
+  3. واتساب: 01001928200
+- رسائل SMS تلقائية عند كل مرحلة:
+  ✔ إنشاء الشحنة → ✔ استلامها من التاجر → ✔ وصولها لمركز الفرز
+  ✔ خروجها للتوصيل → ✔ التسليم النهائي
+- وقت تحديث الحالة: كل 2-4 ساعات
+
+══════════════════════════════════════════
+   سياسة الإرجاع والاسترداد
+══════════════════════════════════════════
+- مدة الإرجاع: خلال 14 يوم من تاريخ الاستلام
+- الشرط: يجب أن تكون الشحنة في حالتها الأصلية بدون استخدام
+- مدة الاسترداد: 3-5 أيام عمل بعد استلام المنتج
+- الإرجاع مجاني في حالة:
+  ✔ عيب من المصنع
+  ✔ المنتج لا يطابق الوصف
+  ✔ خطأ في الشحنة من جهتنا
+- رسوم الإرجاع: 15ج في حالة رفض الاستلام بدون سبب مقبول
+- إعادة التوصيل: مرة واحدة مجانية بعد رفض الاستلام، ثم 15ج لكل محاولة
+
+══════════════════════════════════════════
+   تأمين الشحنات
+══════════════════════════════════════════
+- تأمين مجاني: على كل شحنة تلقائياً حتى 2,000ج
+- تأمين ممتد: حتى 50,000ج بإضافة 1% من قيمة الشحنة فقط
+- شحنة تالفة: التقط صور فوراً واتصل بنا خلال 24 ساعة للتعويض
+- شحنة مفقودة: تعويض كامل خلال 7 أيام عمل بعد التحقق
+- الشحنات ذات القيمة العالية: يُنصح بالتأمين الممتد
+
+══════════════════════════════════════════
+   طرق الدفع
+══════════════════════════════════════════
+- كاش عند الاستلام (COD) — الأكثر استخداماً
+- فودافون كاش — تحويل فوري
+- اورنج كاش / اتصالات كاش
+- بطاقات ائتمانية: فيزا / ماستركارد
+- فوري — في أي فرع أو تطبيق
+- مصاري
+- تحويل بنكي (للشركات والحسابات الكبيرة)
+- للشركات: فواتير شهرية مع مهلة دفع 15 يوم
+
+══════════════════════════════════════════
+   حلول الشركات والمتاجر الإلكترونية
+══════════════════════════════════════════
+- خصومات تصل لـ 40% على الشحن
+- أسعار تبدأ من 25ج/شحنة حسب الحجم الشهري
+- مدير حساب مخصص متاح دائماً
+- فواتير شهرية مع مهلة دفع 15 يوم
+- تقارير يومية وأسبوعية تفصيلية
+- ربط API لمتجرك الإلكتروني (Shopify, WooCommerce, Salla, Zid)
+- نظام COD متكامل مع تسويات يومية
+- لوحة تحكم مخصصة للمتجر
+- لا يوجد حد أدنى لعدد الشحنات
+- عقود شهرية أو سنوية
+- للتسجيل: اتصل 19282 أو راسلنا على business@shiphny.com
+
+══════════════════════════════════════════
+   المشاكل الشائعة وحلولها
+══════════════════════════════════════════
+- شحنة متأخرة: تحقق من رقم التتبع أولاً، لو تأخرت أكثر من المدة المحددة اتصل 19282
+- عنوان خاطئ: يمكن تعديله قبل خروج الشحنة للتوصيل عبر 19282 أو واتساب
+- مندوب لم يصل: اتصل 19282 وسنعيد جدولة التوصيل فوراً
+- شحنة تالفة: التقط صور وأرسلها لواتساب 01001928200 خلال 24 ساعة
+- شحنة مفقودة: فتح بلاغ عبر 19282 وتعويض كامل خلال 7 أيام
+- لم أستلم رسالة التأكيد: تحقق من رقم الهاتف أو تابع عبر الموقع
+- الشحنة عليها Hold: اتصل 19282 لمعرفة السبب وحله
+
+══════════════════════════════════════════
+   معلومات إضافية مهمة
+══════════════════════════════════════════
+- شحن دولي: شحني تعمل داخل مصر فقط، لا شحن لخارج مصر حالياً
+- استقبال طرود من الخارج: غير متاح حالياً
+- الحد الأقصى لوزن الشحنة: 30 كيلو للشحنة العادية
+- الحد الأقصى للأبعاد: 100×60×60 سم
+- الشحنات الكبيرة/الثقيلة: تواصل مع فريق الشركات على 19282
+- المواد الخطرة والسوائل والمواد القابلة للاشتعال: غير مقبولة
+- الأدوية والمستلزمات الطبية: مقبولة مع توثيق
+- المجوهرات والذهب: مقبولة مع التأمين الممتد فقط
+- ساعات عمل خدمة العملاء: 24/7 على الخط الساخن 19282
 """
 
 KNOWLEDGE_BASE_EN = """
-=== Shiphny Express — Egypt's Leading Shipping Company ===
-Hotline: 19282 | WhatsApp: 01001928200 | Track: shiphny.com/track | 24/7
-Founded 2019 | 500+ staff | 200+ vehicles | 15 sorting centers
+╔══════════════════════════════════════════════════════╗
+   Shiphny Express — Egypt's Leading Shipping Company
+╚══════════════════════════════════════════════════════╝
 
---- Prices per Governorate (Standard/Express EGP) ---
-Cairo: 35/45 | Giza: 35/45 | Qalyubia: 35/45
-Alexandria: 40/55 | Beheira: 40/55 | Kafr El Sheikh: 40/55
-Gharbia: 40/55 | Monufia: 40/55 | Dakahlia: 40/55 | Damietta: 40/55
-Fayoum: 50/70 | Beni Suef: 50/70 | Minya: 50/70
-Assiut: 50/70 | Sohag: 50/70 | Qena: 50/70 | Luxor: 50/70 | Aswan: 50/70
-Port Said: 40/55 | Ismailia: 40/55 | Suez: 40/55
-Matrouh: 60/85 | Red Sea (Hurghada/Safaga): 60/85
-South Sinai (Sharm El Sheikh): 60/85 | North Sinai (Arish): 60/85
-New Valley: 60/85
-Free shipping over EGP 500 (Cairo only) | Business from EGP 25/shipment
+■ Contact Information:
+- Hotline: 19282 (24/7)
+- WhatsApp: 01001928200
+- Website: shiphny.com
+- Track shipments: shiphny.com/track
+- Email: support@shiphny.com
+- HQ: Cairo, Egypt
 
---- Delivery Times ---
-Cairo/Giza/Qalyubia: Same day if before 12PM, else next day
-Delta & Canal: 1-2 business days | Upper Egypt: 2-3 days | Border: 3-5 days
-No Friday deliveries
+■ About Shiphny:
+- Founded 2019 | 500+ staff | 200+ delivery vehicles | 15 sorting centers
+- Serves 1M+ customers across all 27 Egyptian governorates | Available 24/7
 
---- Services ---
-Tracking: SH- + 8 digits | Via website, hotline or WhatsApp
-Insurance: Free up to 2000 EGP | Extended up to 50,000 EGP (+1%)
-Returns: 14 days | Refund 3-5 days | Free for defects | 15 EGP refused delivery fee
-Payment: Cash/COD/Vodafone Cash/Visa/Mastercard/Fawry/Bank Transfer
-Damaged shipment: Contact within 24hrs with photos | Lost: compensation within 7 days
-Wrong address: Fix before dispatch via 19282 | Refused: 1 free re-delivery
-Business: 40% discount | Account manager | API | Monthly invoices | No minimum
-International: Domestic Egypt only — no international shipping
+══════════════════════════════════════════
+   Shipping Prices (Standard / Express EGP)
+══════════════════════════════════════════
+Greater Cairo: Cairo 35/45 | Giza 35/45 | Qalyubia 35/45
+Delta: Alexandria 40/55 | Beheira 40/55 | Kafr El Sheikh 40/55
+  Gharbia 40/55 | Monufia 40/55 | Dakahlia 40/55 | Damietta 40/55 | Sharqia 40/55
+Canal: Port Said 40/55 | Ismailia 40/55 | Suez 40/55
+Upper Egypt: Fayoum 50/70 | Beni Suef 50/70 | Minya 50/70
+  Assiut 50/70 | Sohag 50/70 | Qena 50/70 | Luxor 50/70 | Aswan 50/70
+Border/Tourist: Matrouh 60/85 | Red Sea (Hurghada/Safaga/Marsa Alam) 60/85
+  South Sinai (Sharm El Sheikh/Dahab) 60/85 | North Sinai (Arish) 60/85
+  New Valley (Kharga) 60/85
+Special: Free shipping over EGP 500 (Cairo only) | Business from EGP 25/shipment
+
+══════════════════════════════════════════
+   Delivery Times
+══════════════════════════════════════════
+Cairo/Giza/Qalyubia: Same day if ordered before 12PM, else next day
+Alexandria & Delta & Canal: 1-2 business days
+Upper Egypt: 2-3 business days
+Border/Tourist Governorates: 3-5 business days
+No Friday deliveries | Public holidays may add 1 day
+
+══════════════════════════════════════════
+   Tracking
+══════════════════════════════════════════
+Tracking number format: SH- followed by 8 digits (e.g., SH-12345678)
+Track via: shiphny.com/track | Hotline 19282 | WhatsApp 01001928200
+Automatic SMS at: Created → Collected → Sorting Center → Out for Delivery → Delivered
+
+══════════════════════════════════════════
+   Returns & Refunds
+══════════════════════════════════════════
+Return window: 14 days from delivery | Must be in original unused condition
+Refund time: 3-5 business days | Free for: manufacturer defects, wrong item, our error
+15 EGP fee for refusal without valid reason | 1 free re-delivery after refusal
+
+══════════════════════════════════════════
+   Insurance
+══════════════════════════════════════════
+Free insurance up to EGP 2,000 on every shipment automatically
+Extended up to EGP 50,000 by adding 1% of shipment value
+Damaged: take photos, contact within 24hrs | Lost: full compensation within 7 days
+
+══════════════════════════════════════════
+   Payment Methods
+══════════════════════════════════════════
+Cash on Delivery (COD) | Vodafone Cash | Orange Cash | Etisalat Cash
+Visa / Mastercard | Fawry | Bank Transfer
+Business accounts: monthly invoices with 15-day payment terms
+
+══════════════════════════════════════════
+   Business & E-commerce Solutions
+══════════════════════════════════════════
+Up to 40% discount | From EGP 25/shipment | Dedicated account manager
+Daily/weekly reports | API integration (Shopify, WooCommerce, Salla, Zid)
+Full COD system with daily settlements | Custom dashboard | No minimum shipments
+Monthly or annual contracts | Contact: 19282 or business@shiphny.com
+
+══════════════════════════════════════════
+   Important Policies
+══════════════════════════════════════════
+International shipping: Egypt domestic only — no international shipping
+Max weight: 30kg per shipment | Max dimensions: 100×60×60 cm
+Large/heavy shipments: contact business team at 19282
+Not accepted: hazardous materials, flammables, liquids
+Accepted with docs: medicines, medical supplies
+Jewelry/gold: accepted with extended insurance only
+Customer service: 24/7 on hotline 19282
 """
 
 
