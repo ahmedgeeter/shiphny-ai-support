@@ -1,276 +1,254 @@
 <div align="center">
 
-# 🚚 Shiphny AI Support Agent
+# Shiphny AI Support Agent
 
-### نظام دعم عملاء ذكي ومتكامل لشركة شحني Express
+### A production-ready AI customer support system for a real shipping company
 
-**وكيل ذكاء اصطناعي احترافي يتحدث العربية والإنجليزية — يعمل 24/7 — يجيب عن كل سؤال**
-
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-shiphny.netlify.app-blue?style=for-the-badge)](https://shiphny.netlify.app)
-[![Backend](https://img.shields.io/badge/⚙️_Backend-Render.com-green?style=for-the-badge)](https://shiphny-ai-support.onrender.com)
-[![Python](https://img.shields.io/badge/Python-3.11-yellow?style=for-the-badge&logo=python)](https://python.org)
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-shiphny.netlify.app-blue?style=flat-square)](https://shiphny.netlify.app)
+[![Backend API](https://img.shields.io/badge/Backend-Render.com-brightgreen?style=flat-square)](https://shiphny-ai-support.onrender.com/api/docs)
+[![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
 </div>
 
 ---
 
-## 📸 لقطات من النظام
+## What is this?
 
-<div align="center">
-<table>
-<tr>
-<td align="center"><img src="docs/screenshots/chat-pricing.png" width="280"/><br/><b>أسعار الشحن لكل محافظة</b></td>
-<td align="center"><img src="docs/screenshots/chat-coverage.png" width="280"/><br/><b>تغطية المحافظات الحدودية</b></td>
-<td align="center"><img src="docs/screenshots/chat-location.png" width="280"/><br/><b>معلومات الشركة والموقع</b></td>
-</tr>
-</table>
-</div>
+Shiphny is a full-stack AI customer support agent built for a fictional (but realistic) Egyptian shipping company called **Shiphny Express**. The agent — named **Sara** — handles real customer conversations in both Arabic and English, answers questions about shipping prices across all 27 Egyptian governorates, tracks shipments, processes return requests, and escalates frustrated customers to a human agent automatically.
 
-> **سارة** — المساعدة الذكية التي تجيب بدقة على أسعار الشحن لجميع محافظات مصر الـ 27، مواعيد التوصيل، سياسات الإرجاع، وكل ما يخطر على بال العميل.
+This isn't a demo with hardcoded responses. Sara pulls customer data from a live database, builds a dynamic context for each conversation, and calls a large language model to generate a natural, accurate reply — all in under 500ms.
+
+> **Why I built this:** I wanted to solve a real problem. Customer support for shipping companies in Egypt is painful — long wait times, inconsistent answers, and no 24/7 availability. This project shows how AI can replace that friction with something that actually works.
 
 ---
 
-## 🎯 ما هو هذا المشروع؟
+## The problem it solves
 
-**Shiphny AI Support Agent** هو نظام دعم عملاء مدعوم بالذكاء الاصطناعي، مصمم خصيصاً لشركات الشحن والتوصيل في مصر. النظام يحاكي تجربة شركة شحن حقيقية بالكامل.
+Think about calling a shipping company's support line. You wait on hold, the agent doesn't know the exact price for your governorate, and by the time you get an answer it's 9pm and the line is closed.
 
-### لماذا هذا المشروع مهم؟
+Sara fixes all of that:
 
-| المشكلة التقليدية | الحل مع Shiphny AI |
-|---|---|
-| موظف خدمة عملاء يعمل 8 ساعات فقط | الذكاء الاصطناعي متاح **24/7 بدون توقف** |
-| إجابات غير دقيقة أو متأخرة | إجابات فورية من **قاعدة معرفة شاملة** |
-| لا يتذكر محادثات سابقة | **ذاكرة كاملة** للمحادثة من البداية |
-| لا يفهم العربية المصرية | **يتحدث العربية المصرية** بشكل طبيعي |
-| لا يعرف أسعار كل المحافظات | **27 محافظة** بأسعار دقيقة لكل منها |
-| تأخر في التصعيد لموظف بشري | **كشف تلقائي** للحالات التي تحتاج تدخل بشري |
-
----
-
-## ✨ المميزات الرئيسية
-
-### 🤖 الذكاء الاصطناعي
-- **ثنائي اللغة** — عربي وإنجليزي، يكتشف اللغة تلقائياً من أول كلمة
-- **قاعدة معرفة شاملة** — أسعار 27 محافظة، مواعيد التوصيل، سياسات الإرجاع، التأمين، طرق الدفع
-- **تصنيف النية** — يفهم إذا كان العميل يسأل عن سعر، أو يتتبع شحنة، أو يقدم شكوى
-- **تكيف مع الشخصية** — يتعامل مع عملاء VIP بأسلوب مختلف عن العملاء العاديين
-- **كشف التصعيد** — يحول المحادثة لموظف بشري تلقائياً عند الغضب الشديد
-- **نظام Fallback ذكي** — OpenRouter → Groq → إجابة احتياطية، ضمان عدم الانقطاع
-
-### 💬 واجهة الشات
-- تصميم عصري ومتجاوب مع الجوال
-- دعم كامل للـ RTL (العربية)
-- أزرار اقتراحات سريعة
-- مؤشر الكتابة الحي
-- ذاكرة المحادثة عبر localStorage
-
-### 📊 لوحة التحليلات
-- إجمالي المحادثات والعملاء
-- متوسط وقت الاستجابة
-- توزيع النوايا (أسعار، تتبع، شكاوى...)
-- معدل الحل والتصعيد
-
-### 🏢 إدارة الشحنات
-- CRUD كامل للحجوزات
-- متابعة حالة الشحنة
-- ربط الشحنة بالعميل
+- Available **24 hours a day, 7 days a week** — no shifts, no holidays
+- Knows the **exact shipping price** for every one of Egypt's 27 governorates
+- **Remembers the full conversation** — no need to repeat yourself
+- Speaks **natural Egyptian Arabic** — not stiff formal text
+- Detects when a customer is angry and **automatically escalates** to a human
+- Treats **VIP customers differently** — faster, more personalized, with special offers
+- Falls back gracefully — if the primary AI is unavailable, a secondary one kicks in instantly
 
 ---
 
-## 🏗️ هيكل النظام
+## Live demo
+
+| Link | Description |
+|------|-------------|
+| [shiphny.netlify.app](https://shiphny.netlify.app) | The full frontend — try the chat widget |
+| [API Docs (Swagger)](https://shiphny-ai-support.onrender.com/api/docs) | Interactive backend documentation |
+
+---
+
+## Tech stack
+
+| Layer | Technology | Why |
+|-------|-----------|-----|
+| **Primary LLM** | OpenRouter `openai/gpt-oss-120b:free` | No practical rate limits, free tier |
+| **Fallback LLM** | Groq `llama-3.3-70b-versatile` | ~300ms response, free tier |
+| **Backend** | FastAPI 0.111 + Python 3.11 | Async, fast, auto-generates API docs |
+| **Database ORM** | SQLAlchemy 2 (Async) | Non-blocking DB queries |
+| **Database** | SQLite (dev) / PostgreSQL (prod) | Easy to swap for production |
+| **Frontend** | React 18 + TypeScript 5 + Vite | Type-safe, fast builds |
+| **Styling** | Tailwind CSS | Responsive, mobile-first |
+| **HTTP client** | httpx (async) | Non-blocking AI API calls |
+| **Validation** | Pydantic v2 | Strong type safety on every request |
+| **Containers** | Docker + Docker Compose | One-command deployment |
+| **Hosting** | Render (backend) + Netlify (frontend) | Free tier, auto-deploy on push |
+
+---
+
+## How the AI pipeline works
+
+Every message Sara receives goes through this exact sequence:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      المستخدم                           │
-│          Browser (React 18 + TypeScript + Tailwind)      │
-│    Landing Page │ Chat Widget │ Analytics Dashboard      │
-└──────────────────────────┬──────────────────────────────┘
-                           │ HTTP REST API
-┌──────────────────────────▼──────────────────────────────┐
-│              FastAPI Backend (Python 3.11)               │
-│                                                         │
-│  /api/chat ──► Rate Limiter ──► Session Manager         │
-│  /api/bookings              ──► Booking CRUD            │
-│  /api/analytics             ──► Stats & Charts          │
-│  /api/ping                  ──► Keep-alive              │
-│                                                         │
-│  ┌──────────────────────────────────────────────────┐   │
-│  │              AI Pipeline                         │   │
-│  │  1. Language Detection (AR / EN)                 │   │
-│  │  2. Intent Classification (7 categories)         │   │
-│  │  3. Customer Context Assembly (DB)               │   │
-│  │  4. System Prompt Builder + Knowledge Base       │   │
-│  │  5. AI Call: OpenRouter → Groq → Fallback        │   │
-│  │  6. Escalation Detection                         │   │
-│  │  7. Save to DB (intent, confidence, time)        │   │
-│  └──────────────────────────────────────────────────┘   │
-│                                                         │
-│  SQLite Database                                        │
-│  customers │ bookings │ conversations │ messages        │
-└─────────────────────────────────────────────────────────┘
-                           │
-               ┌───────────┼───────────┐
-               ▼           ▼           ▼
-         OpenRouter      Groq AI    Static
-       (Primary AI)    (Fallback)  (Fallback)
-    gpt-oss-120b:free  llama-3.3-70b
+Customer message
+      │
+      ▼
+1. Language detection         Arabic or English, auto-detected per message
+      │
+      ▼
+2. Intent classification      Pricing / Tracking / Complaint / Return / Business / General
+      │
+      ▼
+3. Context assembly           Customer name, tier (VIP/Premium/Standard), shipment history from DB
+      │
+      ▼
+4. Prompt construction        Injects knowledge base (all 27 governorates) + customer context
+      │
+      ▼
+5. AI call                    OpenRouter (primary) → Groq (fallback) → Static response (last resort)
+      │
+      ▼
+6. Escalation check           Detects [ESCALATE_TO_HUMAN] tag in the response
+      │
+      ▼
+7. Persist to database        Message, response, intent, confidence score, response time
 ```
 
----
-
-## 🛠️ التقنيات المستخدمة
-
-| الطبقة | التقنية | السبب |
-|--------|---------|-------|
-| **LLM Primary** | OpenRouter `openai/gpt-oss-120b:free` | مجاني، بدون rate limit عملي |
-| **LLM Fallback** | Groq `llama-3.3-70b-versatile` | سريع جداً (~300ms) |
-| **Backend** | FastAPI 0.111 + Python 3.11 | Async، سريع، توثيق تلقائي |
-| **ORM** | SQLAlchemy 2 (Async) | استعلامات غير متزامنة |
-| **Database** | SQLite (dev) / PostgreSQL (prod) | مرونة النشر |
-| **Frontend** | React 18 + TypeScript 5 + Vite | أداء عالي |
-| **Styling** | Tailwind CSS | تصميم سريع ومتجاوب |
-| **HTTP Client** | httpx (async) | استدعاءات AI غير متزامنة |
-| **Validation** | Pydantic v2 | Type safety كامل |
-| **Container** | Docker + Docker Compose | نشر سهل |
-| **Hosting** | Render (Backend) + Netlify (Frontend) | مجاني في البداية |
+The system never returns a blank screen. If the primary AI is rate-limited, Groq takes over. If Groq fails, a pre-written context-aware response is returned. The customer always gets an answer.
 
 ---
 
-## 📁 هيكل الملفات
+## Features
+
+### AI and conversation
+- Bilingual — detects Arabic vs English per message, not per session
+- Full conversation memory — history is stored in DB and browser localStorage
+- Intent detection across 7 categories with confidence scoring
+- Tone adaptation — VIP customers get a faster, more premium experience
+- Human escalation — detects anger, threats, or explicit requests for a manager
+- Triple-layer fallback — OpenRouter → Groq → Static, zero downtime
+
+### Chat interface
+- Modern floating chat widget, works on mobile
+- Full RTL support for Arabic
+- Quick-action suggestion buttons
+- Live typing indicator
+- Session persistence across page refreshes
+
+### Analytics dashboard
+- Total conversations and active customers
+- Average AI response time
+- Intent distribution chart (what customers ask most)
+- Resolution rate and escalation count
+
+### Shipment management
+- Full CRUD for bookings
+- Shipment status tracking
+- Linked customer profiles
+
+---
+
+## Project structure
 
 ```
 shiphny-ai-support/
 ├── backend/
-│   ├── main.py                      # FastAPI app، startup، health، ping
+│   ├── main.py                    FastAPI app entry point
 │   ├── requirements.txt
 │   ├── Dockerfile
-│   ├── seed_knowledge_base.py       # بيانات قاعدة المعرفة الأولية
+│   ├── seed_knowledge_base.py     Seeds initial knowledge base articles
 │   └── app/
 │       ├── api/
-│       │   ├── chat.py              # Chat endpoint، session، rate limiter
-│       │   ├── bookings.py          # CRUD الحجوزات
-│       │   ├── analytics.py         # إحصاءات لوحة التحكم
-│       │   ├── customers.py         # قراءة بيانات العملاء
-│       │   └── chat_debug.py        # endpoints للتشخيص
+│       │   ├── chat.py            Chat endpoint, session management, rate limiter
+│       │   ├── bookings.py        Shipment CRUD
+│       │   ├── analytics.py       Dashboard stats
+│       │   ├── customers.py       Customer read operations
+│       │   └── chat_debug.py      Debug and health check endpoints
 │       ├── models/
-│       │   ├── customer.py          # نموذج العميل (VIP/Premium/Standard)
-│       │   ├── booking.py           # نموذج الحجز مع enum الحالة
-│       │   ├── conversation.py      # المحادثة، الرسائل، النوايا
-│       │   └── knowledge_base.py    # مقالات قاعدة المعرفة
+│       │   ├── customer.py        Customer model — tier enum (VIP/Premium/Standard)
+│       │   ├── booking.py         Booking model — status enum
+│       │   ├── conversation.py    Conversation, Message, Intent models
+│       │   └── knowledge_base.py  Knowledge base article model
 │       ├── services/
-│       │   ├── groq_ai.py           # خدمة AI الرئيسية (OpenRouter + Groq)
-│       │   ├── gemini_ai.py         # خدمة Gemini الاحتياطية
-│       │   └── fallback_responses.py # إجابات احتياطية ثابتة
+│       │   ├── groq_ai.py         Core AI service — detection, prompts, OpenRouter, Groq
+│       │   ├── gemini_ai.py       Gemini fallback service
+│       │   └── fallback_responses.py  Static bilingual fallback responses
 │       ├── db/
-│       │   └── database.py          # Async session factory
+│       │   └── database.py        Async session factory and DB init
 │       └── core/
-│           └── config.py            # إعدادات التطبيق
+│           └── config.py          App settings via pydantic-settings
 ├── frontend/
 │   ├── src/
-│   │   ├── App.tsx                  # الصفحة الرئيسية، التوجيه، نموذج الحجز
-│   │   ├── api.ts                   # API base URL
-│   │   ├── translations.ts          # نصوص عربي/إنجليزي
+│   │   ├── App.tsx                Landing page, booking form, routing
+│   │   ├── api.ts                 Centralized API base URL
+│   │   ├── translations.ts        Arabic and English UI strings
 │   │   └── components/
-│   │       ├── PersistentChat.tsx   # Chat widget عائم مع localStorage
-│   │       ├── Dashboard.tsx        # لوحة التحليلات
-│   │       ├── ChatWidget.tsx       # Chat مضمّن
-│   │       └── Layout.tsx           # wrapper الصفحة
+│   │       ├── PersistentChat.tsx Floating chat widget with localStorage
+│   │       ├── Dashboard.tsx      Analytics dashboard
+│   │       ├── ChatWidget.tsx     Inline chat component
+│   │       └── Layout.tsx         Page layout wrapper
 │   ├── Dockerfile
 │   └── nginx.conf
-├── docs/
-│   └── screenshots/                 # صور لقطات الشاشة
 ├── docker-compose.yml
-├── render.yaml                      # إعداد النشر التلقائي على Render
-└── .env.example                     # نموذج متغيرات البيئة
+├── render.yaml                    One-click Render deployment config
+└── .env.example                   Environment variable reference
 ```
 
 ---
 
-## 🚀 التشغيل المحلي
+## Running locally
 
-### المتطلبات
-- Python 3.11+
-- Node.js 18+
-- مفتاح OpenRouter API مجاني من [openrouter.ai](https://openrouter.ai)
+**Requirements:** Python 3.11+, Node.js 18+, a free [OpenRouter](https://openrouter.ai) API key
 
-### الخطوات
-
-**1. Backend**
+**Backend**
 ```bash
 cd backend
 
 python -m venv .venv
-.venv\Scripts\activate          # Windows
-# source .venv/bin/activate     # macOS/Linux
+.venv\Scripts\activate        # Windows
+source .venv/bin/activate      # macOS / Linux
 
 pip install -r requirements.txt
 
-# أنشئ ملف .env
-copy ..\\.env.example .env
-
-# افتح .env وأضف:
-# OPENROUTER_API_KEY=sk-or-v1-...
-# GROQ_API_KEY=gsk_...
+cp ../.env.example .env
+# Add OPENROUTER_API_KEY and GROQ_API_KEY to .env
 
 uvicorn main:app --reload --port 8000
 ```
 
-**2. Frontend**
+**Frontend**
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-**3. الروابط المحلية**
-| الخدمة | الرابط |
-|--------|--------|
+| Service | URL |
+|---------|-----|
 | Frontend | http://localhost:3000 |
 | Backend API | http://localhost:8000 |
-| API Docs (Swagger) | http://localhost:8000/api/docs |
-| API Docs (ReDoc) | http://localhost:8000/api/redoc |
+| Swagger docs | http://localhost:8000/api/docs |
 
-### Docker (خطوة واحدة)
+**Docker (single command)**
 ```bash
 cp .env.example backend/.env
-# عدّل backend/.env وأضف API keys
+# Add your API keys to backend/.env
 
 docker compose up --build
 ```
 
 ---
 
-## ⚙️ متغيرات البيئة
+## Environment variables
 
-| المتغير | مطلوب | الوصف |
-|---------|-------|-------|
-| `OPENROUTER_API_KEY` | ✅ نعم | مفتاح OpenRouter (مجاني من openrouter.ai) |
-| `GROQ_API_KEY` | ✅ نعم | مفتاح Groq (مجاني من console.groq.com) |
-| `GEMINI_API_KEY` | اختياري | مفتاح Google Gemini كـ fallback إضافي |
-| `GROQ_MODEL` | لا | الافتراضي: `llama-3.3-70b-versatile` |
-| `DATABASE_URL` | لا | الافتراضي: SQLite محلي |
-| `CORS_ORIGINS` | لا | origins المسموح بها للـ frontend |
-| `DEBUG` | لا | `true` لتفعيل logs التطوير |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `OPENROUTER_API_KEY` | Yes | Free key from [openrouter.ai](https://openrouter.ai) |
+| `GROQ_API_KEY` | Yes | Free key from [console.groq.com](https://console.groq.com) |
+| `GEMINI_API_KEY` | Optional | Google Gemini as additional fallback |
+| `DATABASE_URL` | No | Defaults to local SQLite |
+| `GROQ_MODEL` | No | Defaults to `llama-3.3-70b-versatile` |
+| `CORS_ORIGINS` | No | Allowed frontend origins |
 
 ---
 
-## 📡 API Reference
+## API reference
 
 ### `POST /api/chat`
 ```json
 // Request
 {
-  "message": "كم سعر الشحن للإسكندرية؟",
+  "message": "How much does shipping to Alexandria cost?",
   "customer_id": 1,
-  "session_id": "optional-existing-session",
-  "language": "ar"
+  "session_id": "optional-existing-session-id"
 }
 
 // Response
 {
-  "response": "سعر الشحن للإسكندرية: القياسي 40ج، السريع 55ج 😊",
+  "response": "Shipping to Alexandria is EGP 40 standard, EGP 55 express 😊",
   "session_id": "abc-123",
   "confidence": 0.94,
   "response_time_ms": 380.5,
@@ -280,163 +258,101 @@ docker compose up --build
 ```
 
 ### `GET /api/analytics/dashboard`
-إجمالي المحادثات، العملاء، متوسط وقت الاستجابة، معدل الحل، حالات التصعيد.
+Total conversations, customers, average response time, resolution rate, escalation count.
 
 ### `GET /api/analytics/intents`
-توزيع النوايا مع الأعداد والنسب المئوية.
+Intent distribution with counts and percentages.
 
-### `GET/POST /api/bookings`
-قائمة الحجوزات (GET) أو إنشاء حجز جديد (POST).
+### `GET /api/bookings`
+Paginated list of all shipment bookings.
 
-### `GET /api/health`
-حالة التطبيق والإصدار.
+### `POST /api/bookings`
+Create a new booking record.
 
 ### `GET /api/ping`
-Keep-alive خفيف الوزن — بدون DB، استجابة فورية.
+Ultra-lightweight keep-alive — no DB, instant `{"ok": true}`.
 
 ### `GET /api/debug/apikey`
-فحص حالة جميع API keys (Groq, Gemini, OpenRouter).
+Check which AI keys are loaded (Groq, Gemini, OpenRouter).
 
 ### `GET /api/debug/test-openrouter`
-اختبار مباشر لـ OpenRouter مع سؤال حقيقي.
+Live end-to-end test of the OpenRouter integration.
 
 ---
 
-## ☁️ النشر على الإنترنت
+## Deploying to production
 
-### Backend على Render
+**Backend on Render**
+1. Create a new Web Service on [render.com](https://render.com)
+2. Connect this repository — Render reads `render.yaml` automatically
+3. Add environment variables: `OPENROUTER_API_KEY`, `GROQ_API_KEY`
+4. Deploy
 
-1. افتح [render.com](https://render.com) وأنشئ **Web Service** جديد
-2. اربطه بهذا الـ repository
-3. Render يقرأ `render.yaml` تلقائياً
-4. أضف متغيرات البيئة:
-   - `OPENROUTER_API_KEY`
-   - `GROQ_API_KEY`
-5. اضغط Deploy
+**Frontend on Netlify or Vercel**
+1. Import this repository
+2. Set the root directory to `frontend`
+3. Add `VITE_API_URL` pointing to your Render backend URL
+4. Deploy
 
-### Frontend على Netlify/Vercel
+**Preventing cold starts (important for free tier)**
 
-1. افتح [netlify.com](https://netlify.com) أو [vercel.com](https://vercel.com)
-2. استورد الـ repository
-3. اضبط الـ root directory على `frontend`
-4. أضف:
-   - `VITE_API_URL` = رابط الـ Backend على Render
-5. Deploy
-
-### منع Cold Starts على Render (مهم!)
-
-الـ free tier على Render ينام بعد 15 دقيقة من عدم النشاط ويسبب تأخير 30 ثانية.
-
-**الحل المجاني:** أنشئ cron job على [cron-job.org](https://cron-job.org) يستدعي:
-```
-GET https://shiphny-ai-support.onrender.com/api/ping
-```
-كل **14 دقيقة** — هيبقى الـ backend صاحي دائماً.
+Render's free plan pauses the service after 15 minutes of inactivity, causing a ~30 second delay on the next request. To prevent this, set up a free cron job at [cron-job.org](https://cron-job.org) to ping `GET /api/ping` every 14 minutes. The endpoint is designed specifically for this — no DB queries, instant response.
 
 ---
 
-## 💬 أمثلة محادثات حقيقية
+## Sample conversations
 
-**سعر الشحن**
+**Pricing question**
 ```
-👤 كم سعر الشحن للإسكندرية؟
-🤖 سارة: السعر للإسكندرية 📦
-         - الشحن القياسي: 40 جنيه
-         - الشحن السريع: 55 جنيه
-         لو عندك أي استفسار ثاني أنا موجودة! 😊
-```
-
-**تغطية المحافظات الحدودية**
-```
-👤 هل توصلون لشرم الشيخ؟
-🤖 سارة: ✅ شرم الشيخ (جنوب سيناء):
-         - قياسي: 60 جنيه
-         - سريع: 85 جنيه
-         مدة التوصيل 3-5 أيام عمل 🚚
+User   How much does it cost to ship to Alexandria?
+Sara   Shipping to Alexandria 📦
+       Standard: EGP 40 | Express: EGP 55
+       Anything else I can help you with? 😊
 ```
 
-**معلومات الشركة**
+**Coverage question**
 ```
-👤 مكان الشركة فين؟
-🤖 سارة: مقرنا في القاهرة، مصر 😊
-         لو محتاج أي مساعدة تانية، قولي! 🚀
+User   Do you deliver to Sharm El Sheikh?
+Sara   ✅ Yes! Sharm El Sheikh (South Sinai):
+       Standard: EGP 60 | Express: EGP 85
+       Delivery takes 3-5 business days 🚚
 ```
 
-**تصعيد لموظف بشري**
+**Escalation**
 ```
-👤 هذا مرفوض تماماً، أريد التحدث مع مدير
-🤖 سارة: أفهم مدى إحباطك تماماً، سأحوّل محادثتك
-         لمشرف متخصص الآن. 🔴 [ESCALATE_TO_HUMAN]
+User   This is completely unacceptable. I want to speak to a manager now.
+Sara   I completely understand your frustration and I'm truly sorry.
+       I'm escalating your case to a specialist right now. 🔴 [ESCALATE_TO_HUMAN]
 ```
 
 ---
 
-## 🧠 كيف يعمل الـ AI؟
+## What the AI knows
 
-```
-رسالة العميل
-     │
-     ▼
-┌─────────────────┐
-│ 1. كشف اللغة   │ ◄── عربي أو إنجليزي
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│ 2. تصنيف النية │ ◄── سعر / تتبع / شكوى / إرجاع / شركة / عام
-└────────┬────────┘
-         ▼
-┌─────────────────────────────┐
-│ 3. بناء السياق             │ ◄── اسم العميل + tier + تاريخ الشحنات
-└────────┬────────────────────┘
-         ▼
-┌─────────────────────────────┐
-│ 4. بناء System Prompt      │ ◄── قاعدة المعرفة (27 محافظة) + بيانات العميل
-└────────┬────────────────────┘
-         ▼
-┌─────────────────────────────┐
-│ 5. استدعاء AI              │
-│   OpenRouter (primary)      │
-│   Groq (fallback)           │
-│   Static (last resort)      │
-└────────┬────────────────────┘
-         ▼
-┌─────────────────┐
-│ 6. كشف التصعيد │ ◄── [ESCALATE_TO_HUMAN] tag
-└────────┬────────┘
-         ▼
-┌──────────────────────────────┐
-│ 7. حفظ في DB + إرسال الرد  │
-└──────────────────────────────┘
-```
+The knowledge base baked into every conversation covers:
+
+- **Shipping prices** — exact rates for all 27 Egyptian governorates, standard and express
+- **Delivery times** — same-day in Cairo, 1-2 days Delta, 2-3 days Upper Egypt, 3-5 days border
+- **Shipment tracking** — SH-XXXXXXXX format, via website / hotline / WhatsApp
+- **Returns policy** — 14-day window, 3-5 day refund, free for defects
+- **Insurance** — free up to EGP 2,000, extended to EGP 50,000 for 1% of value
+- **Payment methods** — COD, Vodafone Cash, Visa, Mastercard, Fawry, bank transfer
+- **Business solutions** — up to 40% discount, API integration, dedicated account manager
+- **Common problems** — delayed shipment, wrong address, damaged package, lost shipment
+- **Restrictions** — Egypt domestic only, 30kg max, no hazardous materials
 
 ---
 
-## 📊 قاعدة المعرفة — ماذا يعرف الـ AI؟
+## License
 
-| الموضوع | التفاصيل |
-|---------|----------|
-| **أسعار الشحن** | 27 محافظة بالاسم، قياسي وسريع لكل منها |
-| **مواعيد التوصيل** | القاهرة نفس اليوم، الدلتا 1-2 يوم، الصعيد 2-3، الحدود 3-5 |
-| **التتبع** | رقم SH- + 8 أرقام، عبر الموقع/الخط الساخن/واتساب |
-| **الإرجاع** | 14 يوم، استرداد 3-5 أيام، مجاني للعيوب، 15ج للرفض |
-| **التأمين** | مجاني حتى 2000ج، ممتد حتى 50000ج بـ 1% |
-| **الدفع** | COD، فودافون كاش، فيزا، فوري، تحويل بنكي |
-| **الشركات** | خصم 40%، API، مدير حساب، فواتير شهرية |
-| **القيود** | داخل مصر فقط، 30كج max، لا مواد خطرة |
-| **المشاكل الشائعة** | تأخر، عنوان خاطئ، شحنة تالفة، شحنة مفقودة |
-
----
-
-## 📄 الترخيص
-
-MIT License — مجاني للاستخدام الشخصي والتجاري.
+MIT — free for personal and commercial use.
 
 ---
 
 <div align="center">
 
-**صُنع بـ ❤️ لتحسين تجربة عملاء الشحن في مصر**
+Built to show what AI-powered customer support looks like when it's done properly.
 
-[🌐 Live Demo](https://shiphny.netlify.app) • [⚙️ API Docs](https://shiphny-ai-support.onrender.com/api/docs) • [📞 19282](tel:19282)
+[Live Demo](https://shiphny.netlify.app) · [API Docs](https://shiphny-ai-support.onrender.com/api/docs)
 
 </div>
