@@ -243,66 +243,41 @@ Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-
         recent_bookings_text = await self._load_recent_bookings(db=db, customer_id=customer_context.get("customer_id"))
         system_prompt = self._build_system_prompt(customer_context, detected_lang, recent_bookings_text)
 
-        # Build messages with knowledge base + live bookings
-        messages = [
-            {"role": "system", "content": system_prompt},
-        ]
-
-        # Add conversation history
-        if conversation_history:
-            for msg in conversation_history[-8:]:
-                messages.append({"role": msg.get("role", "user"), "content": msg.get("content", "")})
-
-        # Add current user message
-        messages.append({"role": "user", "content": user_message})
-
-        # Call Groq API with retry on rate limit
         ai_content = None
         tokens_used = 0
-        for attempt in range(2):
+
+        # 1) Try Gemini first (1M token/min free limit)
+        from app.services.gemini_ai import gemini_generate
+        ai_content = await gemini_generate(system_prompt, user_message, conversation_history)
+        if ai_content:
+            print("[AI] Gemini responded")
+
+        # 2) Fallback to Groq if Gemini fails
+        if not ai_content:
+            print("[AI] Gemini failed — trying Groq")
+            messages = [{"role": "system", "content": system_prompt}]
+            if conversation_history:
+                for msg in conversation_history[-6:]:
+                    messages.append({"role": msg.get("role", "user"), "content": msg.get("content", "")})
+            messages.append({"role": "user", "content": user_message})
             try:
                 async with httpx.AsyncClient(timeout=30.0) as client:
                     response = await client.post(
                         self.GROQ_API_URL,
-                        headers={
-                            "Authorization": f"Bearer {self.api_key}",
-                            "Content-Type": "application/json"
-                        },
-                        json={
-                            "model": self.model,
-                            "messages": messages,
-                            "temperature": self.temperature,
-                            "max_tokens": self.max_tokens,
-                            "top_p": 0.9,
-                        }
+                        headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"},
+                        json={"model": self.model, "messages": messages, "temperature": self.temperature, "max_tokens": self.max_tokens}
                     )
-
-                    if response.status_code == 429:
-                        print(f"[Groq] Rate limited — switching to Gemini fallback")
-                        from app.services.gemini_ai import gemini_generate
-                        gemini_text = await gemini_generate(system_prompt, user_message, conversation_history)
-                        if gemini_text:
-                            ai_content = gemini_text
-                        break
-
-                    response.raise_for_status()
-                    data = response.json()
-                    ai_content = data["choices"][0]["message"]["content"]
-                    tokens_used = data.get("usage", {}).get("total_tokens", 0)
-                    break
-
-            except httpx.HTTPStatusError as e:
-                print(f"Groq API error: {e.response.status_code} - {e.response.text}")
-                break
+                    if response.status_code == 200:
+                        data = response.json()
+                        ai_content = data["choices"][0]["message"]["content"]
+                        tokens_used = data.get("usage", {}).get("total_tokens", 0)
+                        print("[AI] Groq responded")
+                    else:
+                        print(f"[Groq] Error {response.status_code}")
             except Exception as e:
-                print(f"Error calling Groq: {e}")
-                break
+                print(f"[Groq] Exception: {e}")
 
-        if not ai_content:
-            from app.services.gemini_ai import gemini_generate
-            print("[Groq] Failed — trying Gemini")
-            ai_content = await gemini_generate(system_prompt, user_message, conversation_history)
-
+        # 3) Static fallback
         if not ai_content:
             from app.services.fallback_responses import get_fallback_response
             ai_content = get_fallback_response(user_message, detected_lang)
