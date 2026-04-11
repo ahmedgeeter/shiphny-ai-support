@@ -129,10 +129,12 @@ async def chat(
         conversation = None
     
     if not conversation:
-        # Create new conversation
+        # Use the provided session_id so the client can resume the same conversation.
+        # Fall back to a generated id only when none was provided.
+        session_id = request.session_id if request.session_id else str(uuid4())[:20]
         conversation = Conversation(
             customer_id=customer.id,
-            session_id=str(uuid4())[:16],
+            session_id=session_id,
             status=ConversationStatus.ACTIVE,
             channel="api"
         )
@@ -166,21 +168,34 @@ async def chat(
     # If the AI asked for identity and the user just replied with a value,
     # automatically call /api/bookings/verify-identity and inject [VERIFIED:ref].
     auto_verified_inject = None
+    pending_ref = None   # track for passing to generate_response
     already_verified = any("[VERIFIED:" in m.get("content", "") for m in history_list)
 
-    if not already_verified and len(history_list) >= 2:
-        # Find a pending SH- reference in recent AI messages
+    if not already_verified:
+        # Find the most recent SH- reference mentioned anywhere in the conversation
+        # (user or assistant) — search ALL history, most recent first
         pending_ref = None
-        for msg in reversed(history_list[-6:]):
-            if msg["role"] == "assistant":
-                found = re.findall(r'SH-\d{8}', msg["content"])
-                if found:
-                    pending_ref = found[0]
-                    break
+        for msg in reversed(history_list):
+            found = re.findall(r'SH-\d{8}', msg.get("content", ""))
+            if found:
+                pending_ref = found[-1]   # take last ref in that message
+                break
+
+        # Also check if the current user message itself contains an SH- ref
+        # (they might be giving the ref in the same message as their verify data)
+        current_refs = re.findall(r'SH-\d{8}', request.message)
+        if current_refs:
+            pending_ref = current_refs[0]
+
 
         if pending_ref:
             user_val = request.message.strip()
-            # Detect method from user input
+            # Strip the SH-ref itself from user_val for cleaner method detection
+            user_val_clean = re.sub(r'SH-\d{8}', '', user_val).strip()
+            if user_val_clean:
+                user_val = user_val_clean
+
+            # Detect verification method from user input
             method = None
             if "@" in user_val and "." in user_val:
                 method = "email"
@@ -190,6 +205,7 @@ async def chat(
                 method = "name"
             elif user_val.replace(" ", "").isdigit():
                 method = "phone_last4"
+            print(f"[DEBUG] method={method} user_val='{user_val}'")
 
             if method:
                 try:
@@ -243,13 +259,17 @@ async def chat(
     }
     
     # Generate AI response
+    # Pass verified_ref directly so generate_response doesn't need to re-scan history
+    # (history was built BEFORE [VERIFIED] was injected, so scanning it would miss it)
+    just_verified_ref = pending_ref if auto_verified_inject else None
     ai_service = get_groq_service()
     try:
         ai_response: AIResponse = await ai_service.generate_response(
             user_message=request.message,
             customer_context=customer_context,
             conversation_history=history_list,
-            db=db
+            db=db,
+            force_verified_ref=just_verified_ref,
         )
     except Exception as e:
         # Fallback response if AI fails

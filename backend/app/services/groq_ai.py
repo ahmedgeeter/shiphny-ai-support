@@ -361,6 +361,7 @@ class GroqAIService:
         detected_lang: str = None,
         recent_bookings_text: str = "",
         identity_verified: bool = False,
+        verified_ref: str = None,
     ) -> str:
         """Build professional system prompt for Sara - Shiphny AI Agent."""
 
@@ -374,44 +375,74 @@ class GroqAIService:
         bookings_section = recent_bookings_text if (recent_bookings_text and identity_verified) else ""
 
         if language == "ar":
+            if identity_verified and bookings_section:
+                ref_note = f" للشحنة {verified_ref}" if verified_ref else ""
+                verification_status = f"""\n=== ✅ [VERIFIED:{verified_ref or ''}] — تم التحقق من الهوية{ref_note} ===
+تم التحقق بنجاح عبر النظام. اعرض تفاصيل الشحنة الموجودة في قسم [تفاصيل الشحنة] بشكل ودي وواضح.
+"""
+            elif identity_verified and verified_ref:
+                verification_status = f"\n=== ✅ [VERIFIED:{verified_ref}] — تم التحقق من هوية العميل للشحنة {verified_ref} \u2014 لكن بيانات الشحنة غير متاحة. أخبر العميل بصدق أنه تم التحقق وستحضر البيانات فوراً.\n"
+            else:
+                verification_status = ""
+
             verification_rules = """
-=== قواعد التحقق من الهوية (مهمة جداً) ===
-عندما يسأل العميل عن تفاصيل شحنة معينة (الحالة، الموقع، التفاصيل، رقم SH-):
-1. اطلب منه أولاً رقم الشحنة إذا لم يذكره.
-2. بعد ذلك اطلب منه التحقق من هويته بإحدى الطرق الثلاث:
-   أ) آخر 4 أرقام من رقم الموبايل المسجل
-   ب) أول اسمين (الاسم الأول والثاني)
-   ج) البريد الإلكتروني المسجل مع الشحنة
-3. بعد أن يعطيك البيانات، أخبره بأنك ستتحقق منها وأخبره بنتيجة التحقق.
-4. إذا تم التحقق بنجاح — اعرض تفاصيل الشحنة كاملة.
-5. إذا فشل التحقق — اعتذر وادعه للمحاولة مرة أخرى أو الاتصال بـ 19282.
-6. لا تعرض أي تفاصيل شحنة قبل التحقق من الهوية.
-ملاحظة: يتم التحقق تلقائياً عبر النظام — إذا رأيت [VERIFIED:رقم الشحنة] في السياق فهذا يعني تم التحقق.
+=== سياسة التحقق من الهوية [إلزامي — لا تخالفها أبداً] ===
+
+قاعدة الذهب والإياب:
+✔️ لا تعرض أي تفاصيل شحنة (حالة، موقع، سعر، وزن، أي بيانات) إلا بعد ظهور [VERIFIED:رقمالشحنة] في السياق.
+✖️ لا تقرر أنت بنفسك أن التحقق نجح — هذا قرار النظام وحده.
+✖️ لا تخترع تفاصيل شحنة ولا تفترض أي معلومة.
+✖️ لا تقل للعميل إن البيانات صحيحة بناءً على ما كتبه — أنت لا تعلم ما هو مخزّن في النظام.
+
+الإجراء عند طلب الشحنة:
+1. إذا لم يذكر رقم الشحنة (يبدأ بـ SH-) → اطلبه.
+2. بعد ذكر الرقم → اطلب بيانات التحقق بإحدى الطرق الثلاث:
+   • آخر 4 أرقام من رقم الموبايل المسجّل
+   • أول اسمين (الاسم الأول والثاني) كما هو مسجَّل
+   • البريد الإلكتروني المسجَّل مع الشحنة
+3. بعد أن يرسل العميل البيانات → قل فقط: "جاري التحقق..." وانتظر رد النظام.
+4. إذا ظهر [VERIFIED:رقمالشحنة] في السياق → عرض التفاصيل من قسم [تفاصيل الشحنة] أدناه.
+5. إذا لم يظهر [VERIFIED] → قل: "عذراً، البيانات غير متطابقة. حاول مرة أخرى أو اتصل بـ 19282."
 """
             prompt = f"""أنت سارة، موظفة خدمة عملاء شركة شحني للشحن في مصر. العميل: {customer_name}.
 ردودك: قصيرة، ودية، بالعربية المصرية، بالإيموجي المناسب.
 لا تخترع معلومات — استخدم قاعدة المعلومات فقط. للأسئلة الخارجة عن نطاقك: حوّل للخط الساخن 19282.
 {verification_rules}
+{verification_status}
 {kb}
 {bookings_section}"""
         else:
+            if identity_verified and bookings_section:
+                ref_note_en = f" for shipment {verified_ref}" if verified_ref else ""
+                verification_status = f"\n=== ✅ [VERIFIED:{verified_ref or ''}] — Identity Confirmed{ref_note_en} ===\nSystem confirmed identity. Show shipment details from [SHIPMENT DETAILS] section below.\n"
+            elif identity_verified and verified_ref:
+                verification_status = f"\n=== ✅ [VERIFIED:{verified_ref}] — Identity confirmed for {verified_ref} — details loading. Tell customer verification succeeded and details are coming.\n"
+            else:
+                verification_status = ""
+
             verification_rules = """
-=== Identity Verification Rules (Very Important) ===
-When a customer asks about a specific shipment (status, location, details, SH- number):
-1. Ask for the shipment reference number if not provided.
-2. Then ask them to verify identity using ONE of three methods:
-   a) Last 4 digits of the registered mobile number
-   b) First two names (first and last name)
-   c) Email address registered with the shipment
-3. After they provide details, inform them you are verifying and share the result.
-4. If verified — show full shipment details.
-5. If failed — apologize and offer to try again or call 19282.
-6. NEVER show shipment details before identity verification.
-Note: Verification is done automatically — if you see [VERIFIED:reference] in context it means verified.
+=== Identity Verification Policy [MANDATORY — NEVER BYPASS] ===
+
+GOLDEN RULE:
+✔️ ONLY show shipment details when [VERIFIED:reference] appears in the conversation context.
+✖️ NEVER decide yourself that verification succeeded.
+✖️ NEVER invent or guess shipment details.
+✖️ NEVER tell the customer their info is correct based on what they typed.
+
+Process when customer asks about a shipment:
+1. If no SH- reference given → ask for it.
+2. Once reference given → ask them to verify identity via ONE of:
+   • Last 4 digits of registered mobile
+   • First and last name as registered
+   • Email address registered with the shipment
+3. After they send data → say ONLY: "Checking now..." — wait for system.
+4. If [VERIFIED:ref] appears in context → show details from [SHIPMENT DETAILS] below.
+5. If [VERIFIED] does NOT appear → say: "Sorry, details don't match. Try again or call 19282."
 """
             prompt = f"""You are Sara, a customer service agent at Shiphny Express (Egypt shipping company). Customer: {customer_name}.
 Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-scope questions refer to hotline 19282.
 {verification_rules}
+{verification_status}
 {kb}
 {bookings_section}"""
 
@@ -491,7 +522,8 @@ Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-
         user_message: str,
         customer_context: Dict[str, Any],
         conversation_history: Optional[list] = None,
-        db=None
+        db=None,
+        force_verified_ref: str = None,
     ) -> AIResponse:
         """Generate AI response with full context, knowledge base, and real-time bookings."""
 
@@ -520,10 +552,28 @@ Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-
             )
 
         # ── Identity Verification Check ───────────────────────────────────────
-        # Scan conversation history for a verified tag injected by the chat endpoint
+        # 1) If chat endpoint just verified this request, use it directly
+        # 2) Otherwise scan conversation history for a persisted [VERIFIED:ref] tag
         identity_verified = False
         verified_ref = None
-        if conversation_history:
+
+        if force_verified_ref:
+            # This request just got verified — use it immediately
+            identity_verified = True
+            verified_ref = force_verified_ref
+            # Augment user_message so the AI knows verification just succeeded
+            # and should now display the shipment details
+            if detected_lang == "ar":
+                user_message = (
+                    f"[النظام: تم التحقق من هوية العميل بنجاح للشحنة {verified_ref}. "
+                    f"اعرض تفاصيل الشحنة الآن بشكل ودي.]\n{user_message}"
+                )
+            else:
+                user_message = (
+                    f"[SYSTEM: Identity verified for shipment {verified_ref}. "
+                    f"Show shipment details now.]\n{user_message}"
+                )
+        elif conversation_history:
             for msg in conversation_history:
                 content = msg.get("content", "")
                 if "[VERIFIED:" in content:
@@ -538,15 +588,35 @@ Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-
             customer_id=customer_context.get("customer_id"),
             verified_ref=verified_ref if identity_verified else None,
         )
-        system_prompt = self._build_system_prompt(customer_context, detected_lang, recent_bookings_text, identity_verified)
+        system_prompt = self._build_system_prompt(
+            customer_context, detected_lang, recent_bookings_text, identity_verified, verified_ref
+        )
 
         ai_content = None
         tokens_used = 0
 
         messages = [{"role": "system", "content": system_prompt}]
         if conversation_history:
-            for msg in conversation_history[-6:]:
-                messages.append({"role": msg.get("role", "user"), "content": msg.get("content", "")})
+            # Always include messages with SH- refs or [VERIFIED] tags (critical context)
+            # Plus the last 6 messages for recency
+            import re as _re
+            pinned = []
+            recent = conversation_history[-8:]
+            recent_set = {id(m) for m in recent}
+            for msg in conversation_history:
+                content = msg.get("content", "")
+                is_critical = (
+                    bool(_re.search(r'SH-\d{8}', content)) or
+                    "[VERIFIED:" in content
+                )
+                if is_critical and id(msg) not in recent_set:
+                    pinned.append(msg)
+            for msg in (pinned + recent):
+                role = msg.get("role", "user")
+                # Skip system messages from going to AI (they were for our logic only)
+                if role == "system":
+                    continue
+                messages.append({"role": role, "content": msg.get("content", "")})
         messages.append({"role": "user", "content": user_message})
 
         # 1) Try OpenRouter first (free models, no rate limit issues)
