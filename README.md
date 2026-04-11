@@ -1,314 +1,442 @@
-# Shiphny AI Support Agent
+<div align="center">
 
-A production-ready AI customer support system for a shipping and logistics company.
-Built with FastAPI, React, and Llama 3.3 70B via the Groq API.
+# 🚚 Shiphny AI Support Agent
+
+### نظام دعم عملاء ذكي ومتكامل لشركة شحني Express
+
+**وكيل ذكاء اصطناعي احترافي يتحدث العربية والإنجليزية — يعمل 24/7 — يجيب عن كل سؤال**
+
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-shiphny.netlify.app-blue?style=for-the-badge)](https://shiphny.netlify.app)
+[![Backend](https://img.shields.io/badge/⚙️_Backend-Render.com-green?style=for-the-badge)](https://shiphny-ai-support.onrender.com)
+[![Python](https://img.shields.io/badge/Python-3.11-yellow?style=for-the-badge&logo=python)](https://python.org)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+
+</div>
 
 ---
 
-## Overview
+## 📸 لقطات من النظام
 
-Shiphny AI Support Agent is a full-stack application that demonstrates how an AI agent
-can handle real customer support workloads for a shipping company. The AI agent, named Sara,
-handles shipment inquiries, pricing questions, complaints, and escalations in both Arabic and English.
+<div align="center">
+<table>
+<tr>
+<td align="center"><img src="docs/screenshots/chat-pricing.png" width="280"/><br/><b>أسعار الشحن لكل محافظة</b></td>
+<td align="center"><img src="docs/screenshots/chat-coverage.png" width="280"/><br/><b>تغطية المحافظات الحدودية</b></td>
+<td align="center"><img src="docs/screenshots/chat-location.png" width="280"/><br/><b>معلومات الشركة والموقع</b></td>
+</tr>
+</table>
+</div>
 
-The system reads live data from a database, meaning Sara responds with accurate shipment information
-rather than generic answers.
+> **سارة** — المساعدة الذكية التي تجيب بدقة على أسعار الشحن لجميع محافظات مصر الـ 27، مواعيد التوصيل، سياسات الإرجاع، وكل ما يخطر على بال العميل.
 
 ---
 
-## Architecture
+## 🎯 ما هو هذا المشروع؟
+
+**Shiphny AI Support Agent** هو نظام دعم عملاء مدعوم بالذكاء الاصطناعي، مصمم خصيصاً لشركات الشحن والتوصيل في مصر. النظام يحاكي تجربة شركة شحن حقيقية بالكامل.
+
+### لماذا هذا المشروع مهم؟
+
+| المشكلة التقليدية | الحل مع Shiphny AI |
+|---|---|
+| موظف خدمة عملاء يعمل 8 ساعات فقط | الذكاء الاصطناعي متاح **24/7 بدون توقف** |
+| إجابات غير دقيقة أو متأخرة | إجابات فورية من **قاعدة معرفة شاملة** |
+| لا يتذكر محادثات سابقة | **ذاكرة كاملة** للمحادثة من البداية |
+| لا يفهم العربية المصرية | **يتحدث العربية المصرية** بشكل طبيعي |
+| لا يعرف أسعار كل المحافظات | **27 محافظة** بأسعار دقيقة لكل منها |
+| تأخر في التصعيد لموظف بشري | **كشف تلقائي** للحالات التي تحتاج تدخل بشري |
+
+---
+
+## ✨ المميزات الرئيسية
+
+### 🤖 الذكاء الاصطناعي
+- **ثنائي اللغة** — عربي وإنجليزي، يكتشف اللغة تلقائياً من أول كلمة
+- **قاعدة معرفة شاملة** — أسعار 27 محافظة، مواعيد التوصيل، سياسات الإرجاع، التأمين، طرق الدفع
+- **تصنيف النية** — يفهم إذا كان العميل يسأل عن سعر، أو يتتبع شحنة، أو يقدم شكوى
+- **تكيف مع الشخصية** — يتعامل مع عملاء VIP بأسلوب مختلف عن العملاء العاديين
+- **كشف التصعيد** — يحول المحادثة لموظف بشري تلقائياً عند الغضب الشديد
+- **نظام Fallback ذكي** — OpenRouter → Groq → إجابة احتياطية، ضمان عدم الانقطاع
+
+### 💬 واجهة الشات
+- تصميم عصري ومتجاوب مع الجوال
+- دعم كامل للـ RTL (العربية)
+- أزرار اقتراحات سريعة
+- مؤشر الكتابة الحي
+- ذاكرة المحادثة عبر localStorage
+
+### 📊 لوحة التحليلات
+- إجمالي المحادثات والعملاء
+- متوسط وقت الاستجابة
+- توزيع النوايا (أسعار، تتبع، شكاوى...)
+- معدل الحل والتصعيد
+
+### 🏢 إدارة الشحنات
+- CRUD كامل للحجوزات
+- متابعة حالة الشحنة
+- ربط الشحنة بالعميل
+
+---
+
+## 🏗️ هيكل النظام
 
 ```
-Browser
-  |
-  |-- Landing Page (React + Tailwind CSS)
-  |-- Analytics Dashboard (React)
-  |-- Chat Widget (React, floating, RTL/LTR)
-       |
-       | HTTP REST
-       |
-  FastAPI Backend (Python 3.11)
-       |
-       |-- /api/chat          Chat endpoint, session management, conversation history
-       |-- /api/bookings      Shipment CRUD operations
-       |-- /api/analytics     Dashboard statistics and intent distribution
-       |-- /api/health        Service health check
-       |-- /api/ping          Lightweight keep-alive endpoint
-       |
-       |-- Rate Limiter (20 requests / 60 seconds per IP)
-       |
-       |-- GroqAI Service
-       |    |-- Language detection (Arabic / English)
-       |    |-- Intent classification (7 categories)
-       |    |-- System prompt builder (customer context + live booking data)
-       |    |-- Groq API call (Llama 3.3 70B, ~300ms avg)
-       |    |-- Escalation detection
-       |
-       |-- SQLite Database
-            |-- customers
-            |-- bookings
-            |-- conversations
-            |-- messages
+┌─────────────────────────────────────────────────────────┐
+│                      المستخدم                           │
+│          Browser (React 18 + TypeScript + Tailwind)      │
+│    Landing Page │ Chat Widget │ Analytics Dashboard      │
+└──────────────────────────┬──────────────────────────────┘
+                           │ HTTP REST API
+┌──────────────────────────▼──────────────────────────────┐
+│              FastAPI Backend (Python 3.11)               │
+│                                                         │
+│  /api/chat ──► Rate Limiter ──► Session Manager         │
+│  /api/bookings              ──► Booking CRUD            │
+│  /api/analytics             ──► Stats & Charts          │
+│  /api/ping                  ──► Keep-alive              │
+│                                                         │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │              AI Pipeline                         │   │
+│  │  1. Language Detection (AR / EN)                 │   │
+│  │  2. Intent Classification (7 categories)         │   │
+│  │  3. Customer Context Assembly (DB)               │   │
+│  │  4. System Prompt Builder + Knowledge Base       │   │
+│  │  5. AI Call: OpenRouter → Groq → Fallback        │   │
+│  │  6. Escalation Detection                         │   │
+│  │  7. Save to DB (intent, confidence, time)        │   │
+│  └──────────────────────────────────────────────────┘   │
+│                                                         │
+│  SQLite Database                                        │
+│  customers │ bookings │ conversations │ messages        │
+└─────────────────────────────────────────────────────────┘
+                           │
+               ┌───────────┼───────────┐
+               ▼           ▼           ▼
+         OpenRouter      Groq AI    Static
+       (Primary AI)    (Fallback)  (Fallback)
+    gpt-oss-120b:free  llama-3.3-70b
 ```
 
 ---
 
-## How the AI Works
+## 🛠️ التقنيات المستخدمة
 
-Each incoming message passes through the following steps in order:
-
-1. **Language detection** — identifies Arabic or English from message content
-2. **Intent classification** — categorizes as: booking inquiry, complaint, pricing, tracking, or general
-3. **Context assembly** — loads customer profile, tier, total orders, and live shipment records from the database
-4. **Prompt construction** — builds a structured system prompt with the full knowledge base and customer-specific context
-5. **Groq API call** — sends the conversation to Llama 3.3 70B, average latency under 500ms
-6. **Escalation check** — detects the escalation trigger tag and flags the conversation for human handoff
-7. **Persistence** — saves the message, AI response, detected intent, confidence score, and response time to the database
-
----
-
-## Features
-
-| Feature               | Description                                                                 |
-|-----------------------|-----------------------------------------------------------------------------|
-| Bilingual AI Agent    | Arabic and English, language auto-detected per message                      |
-| Live Booking Data     | AI queries real shipment records and responds with accurate information      |
-| Intent Detection      | 7 intent categories with confidence scoring                                 |
-| Session Memory        | Conversation history stored in the database and browser localStorage        |
-| Analytics Dashboard   | Conversations, customers, avg response time, resolution rate, intent chart  |
-| Human Escalation      | Detects frustrated customers and flags the session for agent handoff        |
-| Customer Tiers        | VIP, Premium, Standard — Sara adapts response tone per tier                 |
-| Rate Limiting         | 20 messages per 60 seconds per IP address                                   |
-| Booking Management    | Full create, read, and status update operations on shipments                |
-| Docker Support        | Docker Compose setup for one-command local or cloud deployment              |
-| Auto API Docs         | OpenAPI documentation auto-generated at /api/docs                           |
+| الطبقة | التقنية | السبب |
+|--------|---------|-------|
+| **LLM Primary** | OpenRouter `openai/gpt-oss-120b:free` | مجاني، بدون rate limit عملي |
+| **LLM Fallback** | Groq `llama-3.3-70b-versatile` | سريع جداً (~300ms) |
+| **Backend** | FastAPI 0.111 + Python 3.11 | Async، سريع، توثيق تلقائي |
+| **ORM** | SQLAlchemy 2 (Async) | استعلامات غير متزامنة |
+| **Database** | SQLite (dev) / PostgreSQL (prod) | مرونة النشر |
+| **Frontend** | React 18 + TypeScript 5 + Vite | أداء عالي |
+| **Styling** | Tailwind CSS | تصميم سريع ومتجاوب |
+| **HTTP Client** | httpx (async) | استدعاءات AI غير متزامنة |
+| **Validation** | Pydantic v2 | Type safety كامل |
+| **Container** | Docker + Docker Compose | نشر سهل |
+| **Hosting** | Render (Backend) + Netlify (Frontend) | مجاني في البداية |
 
 ---
 
-## Tech Stack
-
-| Layer      | Technology                                       |
-|------------|--------------------------------------------------|
-| LLM        | Llama 3.3 70B Versatile via Groq API             |
-| Backend    | FastAPI 0.111, Python 3.11, async SQLAlchemy 2   |
-| Database   | SQLite (dev), compatible with PostgreSQL         |
-| Frontend   | React 18, TypeScript 5, Vite, Tailwind CSS       |
-| HTTP       | httpx for async external API calls               |
-| Validation | Pydantic v2                                      |
-| Container  | Docker and Docker Compose                        |
-
----
-
-## Project Structure
+## 📁 هيكل الملفات
 
 ```
 shiphny-ai-support/
-|-- backend/
-|   |-- main.py                    FastAPI app, startup hooks, health and ping endpoints
-|   |-- requirements.txt
-|   |-- Dockerfile
-|   |-- app/
-|       |-- api/
-|       |   |-- chat.py            Chat endpoint, session and history management, rate limiter
-|       |   |-- bookings.py        Booking CRUD
-|       |   |-- analytics.py       Dashboard statistics
-|       |   |-- customers.py       Customer read operations
-|       |-- models/
-|       |   |-- customer.py        Customer model with tier enum (VIP, Premium, Standard)
-|       |   |-- booking.py         Booking model with status enum
-|       |   |-- conversation.py    Conversation, Message, and Intent models
-|       |-- services/
-|       |   |-- groq_ai.py         Core AI service: language detection, intent, prompts, Groq calls
-|       |-- db/
-|       |   |-- database.py        Async session factory and database initialization
-|       |-- core/
-|           |-- config.py          Application settings via pydantic-settings
-|-- frontend/
-|   |-- src/
-|   |   |-- App.tsx                Main app, landing page, booking form, routing
-|   |   |-- translations.ts        Arabic and English UI string definitions
-|   |   |-- components/
-|   |       |-- PersistentChat.tsx  Floating chat widget with session and localStorage
-|   |       |-- Dashboard.tsx       Analytics dashboard component
-|   |       |-- ChatWidget.tsx      Inline chat component
-|   |       |-- Layout.tsx          Page layout wrapper
-|   |-- Dockerfile
-|   |-- nginx.conf
-|-- docker-compose.yml
-|-- render.yaml                    Render.com one-click deployment config
-|-- .env.example                   Environment variable reference
+├── backend/
+│   ├── main.py                      # FastAPI app، startup، health، ping
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   ├── seed_knowledge_base.py       # بيانات قاعدة المعرفة الأولية
+│   └── app/
+│       ├── api/
+│       │   ├── chat.py              # Chat endpoint، session، rate limiter
+│       │   ├── bookings.py          # CRUD الحجوزات
+│       │   ├── analytics.py         # إحصاءات لوحة التحكم
+│       │   ├── customers.py         # قراءة بيانات العملاء
+│       │   └── chat_debug.py        # endpoints للتشخيص
+│       ├── models/
+│       │   ├── customer.py          # نموذج العميل (VIP/Premium/Standard)
+│       │   ├── booking.py           # نموذج الحجز مع enum الحالة
+│       │   ├── conversation.py      # المحادثة، الرسائل، النوايا
+│       │   └── knowledge_base.py    # مقالات قاعدة المعرفة
+│       ├── services/
+│       │   ├── groq_ai.py           # خدمة AI الرئيسية (OpenRouter + Groq)
+│       │   ├── gemini_ai.py         # خدمة Gemini الاحتياطية
+│       │   └── fallback_responses.py # إجابات احتياطية ثابتة
+│       ├── db/
+│       │   └── database.py          # Async session factory
+│       └── core/
+│           └── config.py            # إعدادات التطبيق
+├── frontend/
+│   ├── src/
+│   │   ├── App.tsx                  # الصفحة الرئيسية، التوجيه، نموذج الحجز
+│   │   ├── api.ts                   # API base URL
+│   │   ├── translations.ts          # نصوص عربي/إنجليزي
+│   │   └── components/
+│   │       ├── PersistentChat.tsx   # Chat widget عائم مع localStorage
+│   │       ├── Dashboard.tsx        # لوحة التحليلات
+│   │       ├── ChatWidget.tsx       # Chat مضمّن
+│   │       └── Layout.tsx           # wrapper الصفحة
+│   ├── Dockerfile
+│   └── nginx.conf
+├── docs/
+│   └── screenshots/                 # صور لقطات الشاشة
+├── docker-compose.yml
+├── render.yaml                      # إعداد النشر التلقائي على Render
+└── .env.example                     # نموذج متغيرات البيئة
 ```
 
 ---
 
-## Getting Started
+## 🚀 التشغيل المحلي
 
-### Requirements
+### المتطلبات
+- Python 3.11+
+- Node.js 18+
+- مفتاح OpenRouter API مجاني من [openrouter.ai](https://openrouter.ai)
 
-- Python 3.11 or higher
-- Node.js 18 or higher
-- Groq API key (free at https://console.groq.com)
+### الخطوات
 
-### Local Development
-
-**Backend**
-
+**1. Backend**
 ```bash
 cd backend
 
 python -m venv .venv
-.venv\Scripts\activate        # Windows
-source .venv/bin/activate       # macOS and Linux
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # macOS/Linux
 
 pip install -r requirements.txt
 
-cp ../.env.example .env
-# Open .env and set GROQ_API_KEY
+# أنشئ ملف .env
+copy ..\\.env.example .env
+
+# افتح .env وأضف:
+# OPENROUTER_API_KEY=sk-or-v1-...
+# GROQ_API_KEY=gsk_...
 
 uvicorn main:app --reload --port 8000
 ```
 
-**Frontend**
-
+**2. Frontend**
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/api/docs
+**3. الروابط المحلية**
+| الخدمة | الرابط |
+|--------|--------|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8000 |
+| API Docs (Swagger) | http://localhost:8000/api/docs |
+| API Docs (ReDoc) | http://localhost:8000/api/redoc |
 
-### Docker
-
+### Docker (خطوة واحدة)
 ```bash
 cp .env.example backend/.env
-# Set GROQ_API_KEY in backend/.env
+# عدّل backend/.env وأضف API keys
 
 docker compose up --build
 ```
 
 ---
 
-## Environment Variables
+## ⚙️ متغيرات البيئة
 
-| Variable       | Required | Description                                    |
-|----------------|----------|------------------------------------------------|
-| GROQ_API_KEY   | Yes      | API key from console.groq.com (free)           |
-| GROQ_MODEL     | No       | Defaults to llama-3.3-70b-versatile            |
-| DATABASE_URL   | No       | Defaults to SQLite                             |
-| CORS_ORIGINS   | No       | List of allowed frontend origins               |
-| DEBUG          | No       | Set to true for development logging            |
+| المتغير | مطلوب | الوصف |
+|---------|-------|-------|
+| `OPENROUTER_API_KEY` | ✅ نعم | مفتاح OpenRouter (مجاني من openrouter.ai) |
+| `GROQ_API_KEY` | ✅ نعم | مفتاح Groq (مجاني من console.groq.com) |
+| `GEMINI_API_KEY` | اختياري | مفتاح Google Gemini كـ fallback إضافي |
+| `GROQ_MODEL` | لا | الافتراضي: `llama-3.3-70b-versatile` |
+| `DATABASE_URL` | لا | الافتراضي: SQLite محلي |
+| `CORS_ORIGINS` | لا | origins المسموح بها للـ frontend |
+| `DEBUG` | لا | `true` لتفعيل logs التطوير |
 
 ---
 
-## API Reference
+## 📡 API Reference
 
-### POST /api/chat
-
+### `POST /api/chat`
 ```json
-Request:
+// Request
 {
-  "message": "Where is my shipment SH-12345678?",
+  "message": "كم سعر الشحن للإسكندرية؟",
   "customer_id": 1,
-  "session_id": "existing-session-id-or-omit-to-start-new",
-  "language": "en"
+  "session_id": "optional-existing-session",
+  "language": "ar"
 }
 
-Response:
+// Response
 {
-  "response": "Your shipment SH-12345678 is currently in transit.",
-  "session_id": "abc123",
-  "confidence": 0.91,
-  "response_time_ms": 312.4,
-  "detected_intent": "booking_inquiry",
+  "response": "سعر الشحن للإسكندرية: القياسي 40ج، السريع 55ج 😊",
+  "session_id": "abc-123",
+  "confidence": 0.94,
+  "response_time_ms": 380.5,
+  "detected_intent": "shipping_price",
   "escalated": false
 }
 ```
 
-### GET /api/analytics/dashboard
+### `GET /api/analytics/dashboard`
+إجمالي المحادثات، العملاء، متوسط وقت الاستجابة، معدل الحل، حالات التصعيد.
 
-Returns: total conversations, customer count, average response time, resolved count, escalated count.
+### `GET /api/analytics/intents`
+توزيع النوايا مع الأعداد والنسب المئوية.
 
-### GET /api/analytics/intents
+### `GET/POST /api/bookings`
+قائمة الحجوزات (GET) أو إنشاء حجز جديد (POST).
 
-Returns: intent distribution with counts and percentages.
+### `GET /api/health`
+حالة التطبيق والإصدار.
 
-### GET /api/bookings
+### `GET /api/ping`
+Keep-alive خفيف الوزن — بدون DB، استجابة فورية.
 
-Returns: paginated list of all bookings.
+### `GET /api/debug/apikey`
+فحص حالة جميع API keys (Groq, Gemini, OpenRouter).
 
-### POST /api/bookings
-
-Creates a new shipment booking record.
-
-### GET /api/health
-
-Returns: application status and version.
-
-### GET /api/ping
-
-Lightweight keep-alive endpoint, returns `{"ok": true}` with no database access.
+### `GET /api/debug/test-openrouter`
+اختبار مباشر لـ OpenRouter مع سؤال حقيقي.
 
 ---
 
-## Deployment
+## ☁️ النشر على الإنترنت
 
-The repository includes a `render.yaml` file for automated deployment to Render.com.
+### Backend على Render
 
-**Backend on Render**
+1. افتح [render.com](https://render.com) وأنشئ **Web Service** جديد
+2. اربطه بهذا الـ repository
+3. Render يقرأ `render.yaml` تلقائياً
+4. أضف متغيرات البيئة:
+   - `OPENROUTER_API_KEY`
+   - `GROQ_API_KEY`
+5. اضغط Deploy
 
-1. Go to render.com and create a new Web Service
-2. Connect this repository
-3. Render reads render.yaml automatically — no manual configuration needed
-4. Add one environment variable: GROQ_API_KEY
+### Frontend على Netlify/Vercel
+
+1. افتح [netlify.com](https://netlify.com) أو [vercel.com](https://vercel.com)
+2. استورد الـ repository
+3. اضبط الـ root directory على `frontend`
+4. أضف:
+   - `VITE_API_URL` = رابط الـ Backend على Render
 5. Deploy
 
-**Frontend on Vercel**
+### منع Cold Starts على Render (مهم!)
 
-1. Go to vercel.com and import this repository
-2. Set the root directory to frontend
-3. Add environment variable: VITE_API_URL = your Render backend URL
-4. Deploy
+الـ free tier على Render ينام بعد 15 دقيقة من عدم النشاط ويسبب تأخير 30 ثانية.
 
-**Preventing Cold Starts**
-
-The free Render tier pauses after 15 minutes of inactivity, causing a ~30 second delay on the next request.
-To prevent this, set up a free cron job at cron-job.org to call GET /api/ping on your backend every 14 minutes.
+**الحل المجاني:** أنشئ cron job على [cron-job.org](https://cron-job.org) يستدعي:
+```
+GET https://shiphny-ai-support.onrender.com/api/ping
+```
+كل **14 دقيقة** — هيبقى الـ backend صاحي دائماً.
 
 ---
 
-## Example Conversations
+## 💬 أمثلة محادثات حقيقية
 
-**Shipment inquiry in Arabic**
+**سعر الشحن**
 ```
-User:  اخبرني عن شحنتي SH-34634614
-Sara:  شحنتك SH-34634614 - شحن قياسي
-       الحالة: قيد الانتظار
-       من القاهرة الى الاسكندرية - 2 كجم
-       هل تريد معرفة الوقت المتوقع للتسليم؟
-```
-
-**Pricing question in English**
-```
-User:  How much does express shipping cost?
-Sara:  Express shipping starts at EGP 45.
-       Same-day delivery in Greater Cairo.
-       24-hour delivery to all 27 governorates.
-       Includes real-time tracking, SMS notifications, and full insurance.
+👤 كم سعر الشحن للإسكندرية؟
+🤖 سارة: السعر للإسكندرية 📦
+         - الشحن القياسي: 40 جنيه
+         - الشحن السريع: 55 جنيه
+         لو عندك أي استفسار ثاني أنا موجودة! 😊
 ```
 
-**Escalation trigger**
+**تغطية المحافظات الحدودية**
 ```
-User:  This is unacceptable. I want to speak to a manager immediately.
-Sara:  I completely understand your frustration and I apologize for the inconvenience.
-       I am escalating your case to a specialist right now.
-       [Conversation flagged for human handoff]
+👤 هل توصلون لشرم الشيخ؟
+🤖 سارة: ✅ شرم الشيخ (جنوب سيناء):
+         - قياسي: 60 جنيه
+         - سريع: 85 جنيه
+         مدة التوصيل 3-5 أيام عمل 🚚
+```
+
+**معلومات الشركة**
+```
+👤 مكان الشركة فين؟
+🤖 سارة: مقرنا في القاهرة، مصر 😊
+         لو محتاج أي مساعدة تانية، قولي! 🚀
+```
+
+**تصعيد لموظف بشري**
+```
+👤 هذا مرفوض تماماً، أريد التحدث مع مدير
+🤖 سارة: أفهم مدى إحباطك تماماً، سأحوّل محادثتك
+         لمشرف متخصص الآن. 🔴 [ESCALATE_TO_HUMAN]
 ```
 
 ---
 
-## License
+## 🧠 كيف يعمل الـ AI؟
 
-MIT
+```
+رسالة العميل
+     │
+     ▼
+┌─────────────────┐
+│ 1. كشف اللغة   │ ◄── عربي أو إنجليزي
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│ 2. تصنيف النية │ ◄── سعر / تتبع / شكوى / إرجاع / شركة / عام
+└────────┬────────┘
+         ▼
+┌─────────────────────────────┐
+│ 3. بناء السياق             │ ◄── اسم العميل + tier + تاريخ الشحنات
+└────────┬────────────────────┘
+         ▼
+┌─────────────────────────────┐
+│ 4. بناء System Prompt      │ ◄── قاعدة المعرفة (27 محافظة) + بيانات العميل
+└────────┬────────────────────┘
+         ▼
+┌─────────────────────────────┐
+│ 5. استدعاء AI              │
+│   OpenRouter (primary)      │
+│   Groq (fallback)           │
+│   Static (last resort)      │
+└────────┬────────────────────┘
+         ▼
+┌─────────────────┐
+│ 6. كشف التصعيد │ ◄── [ESCALATE_TO_HUMAN] tag
+└────────┬────────┘
+         ▼
+┌──────────────────────────────┐
+│ 7. حفظ في DB + إرسال الرد  │
+└──────────────────────────────┘
+```
+
+---
+
+## 📊 قاعدة المعرفة — ماذا يعرف الـ AI؟
+
+| الموضوع | التفاصيل |
+|---------|----------|
+| **أسعار الشحن** | 27 محافظة بالاسم، قياسي وسريع لكل منها |
+| **مواعيد التوصيل** | القاهرة نفس اليوم، الدلتا 1-2 يوم، الصعيد 2-3، الحدود 3-5 |
+| **التتبع** | رقم SH- + 8 أرقام، عبر الموقع/الخط الساخن/واتساب |
+| **الإرجاع** | 14 يوم، استرداد 3-5 أيام، مجاني للعيوب، 15ج للرفض |
+| **التأمين** | مجاني حتى 2000ج، ممتد حتى 50000ج بـ 1% |
+| **الدفع** | COD، فودافون كاش، فيزا، فوري، تحويل بنكي |
+| **الشركات** | خصم 40%، API، مدير حساب، فواتير شهرية |
+| **القيود** | داخل مصر فقط، 30كج max، لا مواد خطرة |
+| **المشاكل الشائعة** | تأخر، عنوان خاطئ، شحنة تالفة، شحنة مفقودة |
+
+---
+
+## 📄 الترخيص
+
+MIT License — مجاني للاستخدام الشخصي والتجاري.
+
+---
+
+<div align="center">
+
+**صُنع بـ ❤️ لتحسين تجربة عملاء الشحن في مصر**
+
+[🌐 Live Demo](https://shiphny.netlify.app) • [⚙️ API Docs](https://shiphny-ai-support.onrender.com/api/docs) • [📞 19282](tel:19282)
+
+</div>
