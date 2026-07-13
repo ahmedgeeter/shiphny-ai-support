@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <!-- Road/ground lines -->
+  <rect x="20" y="200" width="90" height="8" rx="4" fill="#2D3E50"/>
+  <rect x="130" y="200" width="106" height="8" rx="4" fill="#2D3E50"/>
+
+  <!-- Truck body (dark navy) -->
+  <rect x="20" y="120" width="150" height="80" rx="12" fill="#2D3E50"/>
+
+  <!-- Truck cab (coral/red) -->
+  <path d="M170 140 L170 200 L230 200 L230 160 L210 140 Z" fill="#E0442E"/>
+  <!-- Cab window -->
+  <path d="M178 148 L178 170 L220 170 L220 162 L205 148 Z" fill="#B8D4E8" opacity="0.9"/>
+
+  <!-- Exhaust pipe -->
+  <rect x="225" y="130" width="8" height="20" rx="4" fill="#2D3E50"/>
+
+  <!-- Motion lines (speed effect) -->
+  <rect x="2" y="148" width="45" height="7" rx="3.5" fill="#2D3E50"/>
+  <rect x="2" y="163" width="32" height="7" rx="3.5" fill="#2D3E50"/>
+  <rect x="2" y="178" width="22" height="7" rx="3.5" fill="#2D3E50"/>
+
+  <!-- Rear wheel -->
+  <circle cx="80" cy="204" r="22" fill="#2D3E50"/>
+  <circle cx="80" cy="204" r="12" fill="#F5F5F5"/>
+  <circle cx="80" cy="204" r="5" fill="#2D3E50"/>
+
+  <!-- Front wheel -->
+  <circle cx="190" cy="204" r="22" fill="#2D3E50"/>
+  <circle cx="190" cy="204" r="12" fill="#F5F5F5"/>
+  <circle cx="190" cy="204" r="5" fill="#2D3E50"/>
+
+  <!-- Gift box on truck (coral) -->
+  <rect x="68" y="68" width="84" height="68" rx="8" fill="#E0442E"/>
+  <!-- Gift box bottom shine -->
+  <rect x="68" y="110" width="84" height="26" rx="0" fill="#C73A28" rx="0"/>
+  <rect x="68" y="110" width="84" height="26" fill="#C73A28"/>
+  <!-- Ribbon vertical -->
+  <rect x="104" y="68" width="14" height="68" fill="#FFF" opacity="0.3"/>
+  <!-- Ribbon horizontal -->
+  <rect x="68" y="96" width="84" height="12" fill="#FFF" opacity="0.3"/>
+
+  <!-- Bow left loop -->
+  <ellipse cx="91" cy="58" rx="20" ry="14" fill="#E0442E" transform="rotate(-30 91 58)"/>
+  <ellipse cx="91" cy="58" rx="13" ry="8" fill="#C73A28" transform="rotate(-30 91 58)"/>
+  <!-- Bow right loop -->
+  <ellipse cx="131" cy="58" rx="20" ry="14" fill="#E0442E" transform="rotate(30 131 58)"/>
+  <ellipse cx="131" cy="58" rx="13" ry="8" fill="#C73A28" transform="rotate(30 131 58)"/>
+  <!-- Bow center knot -->
+  <circle cx="111" cy="68" r="10" fill="#E0442E"/>
+  <!-- Bow ribbon tail left -->
+  <path d="M111 68 Q90 82 78 78" stroke="#E0442E" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <!-- Bow ribbon tail right -->
+  <path d="M111 68 Q132 82 144 78" stroke="#E0442E" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <!-- Bookmark shape in center -->
+  <path d="M105 42 L117 42 L117 64 L111 58 L105 64 Z" fill="#FFF" opacity="0.9"/>
+</svg>
