@@ -2,7 +2,7 @@ backend:
   replicaCount: 2
   image:
     repository: "322824640926.dkr.ecr.us-east-1.amazonaws.com/shippny-backend"
-    tag: "latest"
+    tag: "28f8de75b250ae74ba72c2696f37a9a89c948296"
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -29,7 +29,7 @@ frontend:
   replicaCount: 2
   image:
     repository: "322824640926.dkr.ecr.us-east-1.amazonaws.com/shippny-frontend"
-    tag: "latest"
+    tag: "28f8de75b250ae74ba72c2696f37a9a89c948296"
     pullPolicy: Always
   service:
     type: ClusterIP
