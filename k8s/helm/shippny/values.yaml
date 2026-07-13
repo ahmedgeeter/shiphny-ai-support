@@ -2,7 +2,7 @@ backend:
   replicaCount: 2
   image:
     repository: "322824640926.dkr.ecr.us-east-1.amazonaws.com/shippny-backend"
-    tag: "28f8de75b250ae74ba72c2696f37a9a89c948296"
+    tag: "d7a052a810d20dde12ca55f78652b8048014cd46"
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -29,7 +29,7 @@ frontend:
   replicaCount: 2
   image:
     repository: "322824640926.dkr.ecr.us-east-1.amazonaws.com/shippny-frontend"
-    tag: "28f8de75b250ae74ba72c2696f37a9a89c948296"
+    tag: "d7a052a810d20dde12ca55f78652b8048014cd46"
     pullPolicy: Always
   service:
     type: ClusterIP
