@@ -110,8 +110,8 @@ KNOWLEDGE_BASE_AR = """
   2. الخط الساخن: 19282
   3. واتساب: 01001928200
 - رسائل SMS تلقائية عند كل مرحلة:
-  ✔ إنشاء الشحنة → ✔ استلامها من التاجر → ✔ وصولها لمركز الفرز
-  ✔ خروجها للتوصيل → ✔ التسليم النهائي
+   إنشاء الشحنة →  استلامها من التاجر →  وصولها لمركز الفرز
+   خروجها للتوصيل →  التسليم النهائي
 - وقت تحديث الحالة: كل 2-4 ساعات
 
 ══════════════════════════════════════════
@@ -121,9 +121,9 @@ KNOWLEDGE_BASE_AR = """
 - الشرط: يجب أن تكون الشحنة في حالتها الأصلية بدون استخدام
 - مدة الاسترداد: 3-5 أيام عمل بعد استلام المنتج
 - الإرجاع مجاني في حالة:
-  ✔ عيب من المصنع
-  ✔ المنتج لا يطابق الوصف
-  ✔ خطأ في الشحنة من جهتنا
+   عيب من المصنع
+   المنتج لا يطابق الوصف
+   خطأ في الشحنة من جهتنا
 - رسوم الإرجاع: 15ج في حالة رفض الاستلام بدون سبب مقبول
 - إعادة التوصيل: مرة واحدة مجانية بعد رفض الاستلام، ثم 15ج لكل محاولة
 
@@ -717,7 +717,7 @@ Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-
                                 ai_content = _text
                                 tokens_used = data.get("usage", {}).get("total_tokens", 0)
                                 model_used = f"openrouter/{_or_model.split('/')[-1]}"
-                                print(f"[AI] ✓ OpenRouter ({_or_model})")
+                                print(f"[AI]  OpenRouter ({_or_model})")
                         else:
                             print(f"[AI] OpenRouter {_or_model} → {response.status_code}")
                 except Exception as e:
@@ -740,7 +740,7 @@ Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-
                             ai_content = data["choices"][0]["message"]["content"]
                             tokens_used = data.get("usage", {}).get("total_tokens", 0)
                             model_used = f"groq/{self.model}"
-                            print(f"[AI] ✓ Groq ({self.model})")
+                            print(f"[AI]  Groq ({self.model})")
                             break
                         elif response.status_code == 429:
                             if _attempt == 0:
@@ -782,7 +782,7 @@ Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-
                             data = r.json()
                             ai_content = data["candidates"][0]["content"]["parts"][0]["text"]
                             model_used = "gemini/gemini-2.0-flash"
-                            print("[AI] ✓ Gemini")
+                            print("[AI]  Gemini")
                         else:
                             print(f"[AI] Gemini {r.status_code}: {r.text[:150]}")
                 except Exception as e:

@@ -60,7 +60,7 @@ def generate_conversations():
                 (MessageRole.USER, "انا عايز استرجع الطلب كله!!! المنتج واصل تالف ومكسور وانا مش هقبل حاجة تانيه غير فلوسي تاني"),
                 (MessageRole.ASSISTANT, "أعتذر بشدة عن هذا الموقف المزعج. أنا أفهم غضبك تماماً، وسأعمل على حل هذا فوراً. [يتحقق من البيانات] طلبك #45692 (طقم أواني خزفية - 2,450 جنيه)، تم التوصيل صباح اليوم. صوّرت المنتج والتلف؟"),
                 (MessageRole.USER, "ايوه صورت كل حاجه والتغليف كان مفتوح والخزف مكسور"),
-                (MessageRole.ASSISTANT, "شكراً لتوضيح ذلك. هذا غير مقبول تماماً منا. أنا أُوافق على استردادك الكامل فوراً - لا انتظار، لا أسئلة. [يبدأ إجراءات الاسترداد] ✅ تم الموافقة على استرداد مبلغ 2,450 جنيه. المبلغ سيظهر في حسابك البنكي خلال 3-5 أيام عمل. سيتواصل معك فريقنا خلال ساعة لترتيب استلام المنتج التالف. أنا شخصياً سأتابع هذا الأمر. مرة أخرى، أعتذر بشدة، ونحن نقدر ولائك كعميل VIP."),
+                (MessageRole.ASSISTANT, "شكراً لتوضيح ذلك. هذا غير مقبول تماماً منا. أنا أُوافق على استردادك الكامل فوراً - لا انتظار، لا أسئلة. [يبدأ إجراءات الاسترداد]  تم الموافقة على استرداد مبلغ 2,450 جنيه. المبلغ سيظهر في حسابك البنكي خلال 3-5 أيام عمل. سيتواصل معك فريقنا خلال ساعة لترتيب استلام المنتج التالف. أنا شخصياً سأتابع هذا الأمر. مرة أخرى، أعتذر بشدة، ونحن نقدر ولائك كعميل VIP."),
             ],
         },
         
@@ -72,7 +72,7 @@ def generate_conversations():
             "status": ConversationStatus.RESOLVED,
             "messages": [
                 (MessageRole.USER, "Hi! I just wanted to say your service is amazing! I ordered yesterday and got my package today in Alexandria. Super fast!"),
-                (MessageRole.ASSISTANT, "Hi there! 😊 Thank you so much for your wonderful feedback! We're thrilled to hear you had a great experience with our delivery service. Alexandria is one of our priority zones, and we work hard to ensure fast delivery. Is there anything else I can help you with today? Perhaps checking out our new arrivals or your loyalty points?"),
+                (MessageRole.ASSISTANT, "Hi there!  Thank you so much for your wonderful feedback! We're thrilled to hear you had a great experience with our delivery service. Alexandria is one of our priority zones, and we work hard to ensure fast delivery. Is there anything else I can help you with today? Perhaps checking out our new arrivals or your loyalty points?"),
                 (MessageRole.USER, "Oh I didn't know about loyalty points! How does that work?"),
                 (MessageRole.ASSISTANT, "Great question! Our loyalty program gives you 1 point for every 1 EGP spent. 100 points = 1 EGP discount. You also get: 2x points for orders over 2,000 EGP, tier benefits (Bronze, Silver, Gold, Platinum) with increasing multipliers. Your current order earned you [X] points! You can check your full balance in your account under 'My Rewards'. Would you like me to help you with anything else?"),
             ],

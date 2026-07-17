@@ -48,7 +48,7 @@ time.sleep(0.8)
 r2, _ = post(f'{base}/api/chat', {'message': 'ahmed123@gmail.com', 'session_id': s1, 'language': 'ar'})
 reply2 = r2.get('response', '')
 # Must NOT say "Checking now" alone AND must contain rejection words
-stops_at_checking = reply2.strip().lower() in ['checking now...', '🔒 checking now...', 'جاري التحقق...', '🕒 جاري التحقق...']
+stops_at_checking = reply2.strip().lower() in ['checking now...', ' checking now...', 'جاري التحقق...', ' جاري التحقق...']
 bad_kw = ['قيد الانتظار','تم التأكيد','Express','Giza','Maadi','Corniche','Mohandessen','Dalya','2.0']
 leaked = [w for w in bad_kw if w.lower() in reply2.lower()]
 rejection_kw = ['غير صحيح','غير مطابق','عذر','حاول','19282','incorrect','don\'t match','sorry','try again','البيانات']
@@ -70,7 +70,7 @@ reply4 = r4.get('response', '')
 good_kw = ['Express', 'Giza', 'Maadi', 'Corniche', 'Mohandessen',
            'قيد الانتظار', 'تم', 'الشحنة', ref]
 has_details = any(w.lower() in reply4.lower() for w in good_kw)
-stops_at_checking2 = reply4.strip().lower() in ['checking now...', '🔒 checking now...', 'جاري التحقق...', '🕒 جاري التحقق...']
+stops_at_checking2 = reply4.strip().lower() in ['checking now...', ' checking now...', 'جاري التحقق...', ' جاري التحقق...']
 
 check('S2-T2: Correct email → shows shipment details', has_details, reply4[:200])
 check('S2-T2: Correct email → NOT "Checking now" alone', not stops_at_checking2, reply4[:80])
@@ -110,7 +110,7 @@ print(f"RESULT: {len(results)-len(failed)}/{len(results)} passed")
 if failed:
     print("FAILED:")
     for l in failed:
-        print(f"  ✗ {l}")
+        print(f"   {l}")
     sys.exit(1)
 else:
-    print("ALL TESTS PASSED ✅")
+    print("ALL TESTS PASSED ")

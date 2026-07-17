@@ -3,5 +3,7 @@
 from app.models.customer import Customer
 from app.models.conversation import Conversation, Message
 from app.models.knowledge_base import KnowledgeBaseArticle
+from app.models.shipment import Shipment, ShipmentStatus
+from app.models.invoice import Invoice, InvoiceStatus
 
-__all__ = ["Customer", "Conversation", "Message", "KnowledgeBaseArticle"]
+__all__ = ["Customer", "Conversation", "Message", "KnowledgeBaseArticle", "Shipment", "ShipmentStatus", "Invoice", "InvoiceStatus"]

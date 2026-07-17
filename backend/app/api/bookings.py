@@ -220,8 +220,8 @@ async def verify_identity(
     if verified:
         return VerifyIdentityResponse(
             verified=True,
-            message_ar="تم التحقق من هويتك بنجاح ✅",
-            message_en="Identity verified successfully ✅",
+            message_ar="تم التحقق من هويتك بنجاح ",
+            message_en="Identity verified successfully ",
             booking=_to_response(booking, mask=False),
         )
     else:

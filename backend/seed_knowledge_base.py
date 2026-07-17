@@ -311,7 +311,7 @@ async def seed():
             select(KnowledgeBaseArticle).limit(1)
         )
         if result.scalar_one_or_none():
-            print("⚠️  Knowledge base already has articles. Clearing and re-seeding...")
+            print("️  Knowledge base already has articles. Clearing and re-seeding...")
             from sqlalchemy import delete
             await session.execute(delete(KnowledgeBaseArticle))
             await session.commit()
@@ -322,7 +322,7 @@ async def seed():
             session.add(article)
 
         await session.commit()
-        print(f"✅ Seeded {len(ARTICLES)} knowledge base articles ({sum(1 for a in ARTICLES if a['language'] == ArticleLanguage.ARABIC)} AR + {sum(1 for a in ARTICLES if a['language'] == ArticleLanguage.ENGLISH)} EN)")
+        print(f" Seeded {len(ARTICLES)} knowledge base articles ({sum(1 for a in ARTICLES if a['language'] == ArticleLanguage.ARABIC)} AR + {sum(1 for a in ARTICLES if a['language'] == ArticleLanguage.ENGLISH)} EN)")
 
 
 if __name__ == "__main__":

@@ -21,6 +21,8 @@ import app.models.customer       # noqa: F401
 import app.models.conversation   # noqa: F401
 import app.models.knowledge_base # noqa: F401
 import app.models.booking        # noqa: F401
+import app.models.shipment       # noqa: F401
+import app.models.invoice        # noqa: F401
 
 # Create FastAPI app
 app = FastAPI(

@@ -33,10 +33,10 @@ async def seed_database():
     
     engine = get_engine()
     
-    print("\n🔄 Initializing database...")
+    print("\n Initializing database...")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    print("   ✅ Database tables created")
+    print("    Database tables created")
     
     async with AsyncSessionLocal() as session:
         # Check if already seeded
@@ -44,30 +44,30 @@ async def seed_database():
         customer_count = result.scalar()
         
         if customer_count > 0:
-            print(f"\n⚠️  Database already contains {customer_count} customers")
+            print(f"\n️  Database already contains {customer_count} customers")
             print("   Use --force flag to reseed (not implemented yet)")
             return
         
-        print("\n📊 Seeding data...")
+        print("\n Seeding data...")
         
         # 1. Seed Customers (50)
-        print("\n   👥 Adding 50 customers...")
+        print("\n    Adding 50 customers...")
         for customer_data in ALL_CUSTOMERS:
             customer = Customer(**customer_data)
             session.add(customer)
         await session.commit()
-        print("      ✅ 50 customers added")
+        print("       50 customers added")
         
         # 2. Seed Knowledge Base (20 articles)
-        print("\n   📚 Adding 20 knowledge base articles...")
+        print("\n    Adding 20 knowledge base articles...")
         for article_data in get_kb_articles():
             article = KnowledgeBaseArticle(**article_data)
             session.add(article)
         await session.commit()
-        print("      ✅ 20 KB articles added")
+        print("       20 KB articles added")
         
         # 3. Seed Conversations and Messages
-        print(f"\n   💬 Adding {len(CONVERSATIONS_DATA)} conversations...")
+        print(f"\n    Adding {len(CONVERSATIONS_DATA)} conversations...")
         total_messages = 0
         
         for conv_data in CONVERSATIONS_DATA:
@@ -90,11 +90,11 @@ async def seed_database():
                 print(f"      Progress: {conv_data['id']}/50 conversations")
         
         await session.commit()
-        print(f"      ✅ {len(CONVERSATIONS_DATA)} conversations added")
-        print(f"      ✅ {total_messages} messages added")
+        print(f"       {len(CONVERSATIONS_DATA)} conversations added")
+        print(f"       {total_messages} messages added")
         
         # 4. Update KB usage stats
-        print("\n   📈 Updating analytics...")
+        print("\n    Updating analytics...")
         result = await session.execute(select(func.count()).select_from(Conversation))
         conv_count = result.scalar()
         
@@ -105,23 +105,23 @@ async def seed_database():
         
         print(f"      Total conversations: {conv_count}")
         print(f"      Total user messages: {user_msg_count}")
-        print("      ✅ Analytics updated")
+        print("       Analytics updated")
         
         # Summary
         print("\n" + "=" * 70)
-        print("✅ DATABASE SEEDED SUCCESSFULLY")
+        print(" DATABASE SEEDED SUCCESSFULLY")
         print("=" * 70)
-        print(f"\n📊 Summary:")
+        print(f"\n Summary:")
         print(f"   • Customers: 50")
         print(f"   • KB Articles: 20")
         print(f"   • Conversations: {conv_count}")
         print(f"   • Messages: {user_msg_count + total_messages}")
-        print(f"\n🚀 Ready for Phase 3: Backend API & AI Integration")
+        print(f"\n Ready for Phase 3: Backend API & AI Integration")
 
 
 if __name__ == "__main__":
     try:
         asyncio.run(seed_database())
     except Exception as e:
-        print(f"\n❌ Seeding failed: {e}")
+        print(f"\n Seeding failed: {e}")
         sys.exit(1)

@@ -61,7 +61,7 @@ reply2 = r2['response']
 good_kw = ['Express', 'Giza', 'Maadi', 'Corniche', 'Mohandessen', 'قيد الانتظار', 'تم', ref, '2.0']
 leaked = any(w.lower() in reply2.lower() for w in good_kw)
 if leaked:
-    print("[PASS] Correct email → shipment details shown ✅")
+    print("[PASS] Correct email → shipment details shown ")
 else:
-    print("[FAIL] Correct email → details NOT shown ❌")
+    print("[FAIL] Correct email → details NOT shown ")
     print(f"       Full reply: {reply2}")
