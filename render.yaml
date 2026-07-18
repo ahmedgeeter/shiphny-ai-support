@@ -15,9 +15,13 @@ services:
       - key: GROQ_MODEL
         value: llama-3.1-8b-instant
       - key: DATABASE_URL
-        value: sqlite+aiosqlite:///./supportbot.db
+        value: sqlite+aiosqlite:////tmp/supportbot.db
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: '["https://shiphny-ai-support-main.vercel.app","https://shiphny-ai-support.vercel.app","http://localhost:3000","http://localhost:5173","*"]'
       - key: PYTHONIOENCODING
         value: utf-8
       - key: DEBUG
         value: "false"
-    healthCheckPath: /api/ping
+    healthCheckPath: /api/health
