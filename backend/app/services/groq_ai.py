@@ -587,24 +587,28 @@ Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-
 
         messages = [{"role": "system", "content": system_prompt}]
 
-        # One-shot example: show the model the verification flow pattern
+        # One-shot examples: teach the model the CORRECT behaviour
         if detected_lang == "ar":
             messages += [
+                # Example 1: General question → answer directly, NO verification needed
+                {"role": "user",      "content": "كم سعر الشحن للإسكندرية؟"},
+                {"role": "assistant", "content": "سعر الشحن للإسكندرية 40 ج.م (قياسي) أو 55 ج.م (سريع). هل تحتاج حاجة تانية؟ 😊"},
+                # Example 2: Tracking specific shipment → ask for reference then verify
                 {"role": "user",      "content": "عايز اعرف حالة شحنتي SH-12345678"},
-                {"role": "assistant", "content": "أهلاً! لأديك تفاصيل SH-12345678 محتاج أتحقق من هويتك:\n1. آخر 4 أرقام من موبايلك\n2. اسمك الأول والثاني\n3. بريدك الإلكتروني المسجّل"},
-                {"role": "user",      "content": "[تم التحقق] تم التحقق من هوية العميل بنجاح للشحنة SH-12345678. اعرض التفاصيل الآن.\nexample@mail.com"},
-                {"role": "assistant", "content": "تم التحقق. شحنتك SH-12345678: الحالة قيد الانتظار، من القاهرة إلى الإسكندرية. هل تحتاج شيء آخر؟"},
-                {"role": "user",      "content": "[نتيجة التحقق: فشل] البيانات غير مطابقة.\nwrong@mail.com"},
-                {"role": "assistant", "content": "آسف، البيانات غير صحيحة. جرّب طريقة أخرى أو اتصل على 19282."},
+                {"role": "assistant", "content": "أهلاً! لأديك تفاصيل SH-12345678 محتاج أتحقق من هويتك بإحدى الطرق:\n1. آخر 4 أرقام من موبايلك\n2. اسمك الأول والثاني\n3. بريدك الإلكتروني المسجّل"},
+                {"role": "user",      "content": "example@mail.com"},
+                {"role": "assistant", "content": "[VERIFIED:SH-12345678] تم التحقق. شحنتك SH-12345678: الحالة قيد الانتظار، من القاهرة إلى الإسكندرية. هل تحتاج شيء آخر؟"},
             ]
         else:
             messages += [
-                {"role": "user",      "content": "Check shipment SH-12345678"},
-                {"role": "assistant", "content": "Hi! To see SH-12345678 details, I need to verify your identity:\n1. Last 4 digits of mobile\n2. First and last name\n3. Registered email"},
-                {"role": "user",      "content": "[Verified] Identity verified for SH-12345678. Show details now.\nexample@mail.com"},
-                {"role": "assistant", "content": "Verified. SH-12345678: Status Pending, Cairo to Alexandria. Anything else?"},
-                {"role": "user",      "content": "[VERIFY RESULT: FAILED] Data doesn't match.\nwrong@mail.com"},
-                {"role": "assistant", "content": "Sorry, that does not match. Try another method or call 19282."},
+                # Example 1: General question → answer directly, NO verification
+                {"role": "user",      "content": "What is the shipping price to Alexandria?"},
+                {"role": "assistant", "content": "Shipping to Alexandria costs 40 EGP (standard) or 55 EGP (express). Anything else I can help with? 😊"},
+                # Example 2: Tracking → ask for reference then verify
+                {"role": "user",      "content": "Where is my shipment SH-12345678?"},
+                {"role": "assistant", "content": "Hi! To show you details for SH-12345678, I need to verify your identity via one of:\n1. Last 4 digits of your mobile\n2. First and last name\n3. Registered email"},
+                {"role": "user",      "content": "example@mail.com"},
+                {"role": "assistant", "content": "[VERIFIED:SH-12345678] Verified! SH-12345678: Status Pending, Cairo to Alexandria. Anything else?"},
             ]
 
         if conversation_history:
