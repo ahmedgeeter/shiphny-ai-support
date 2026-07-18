@@ -29,6 +29,10 @@ class Settings(BaseSettings):
         default="sqlite+aiosqlite:///./supportbot.db",
         description="Database connection URL"
     )
+    database_url_sync: str = Field(
+        default="sqlite:///./supportbot.db",
+        description="Sync database connection URL for alembic"
+    )
     database_echo: bool = Field(default=False, description="Log SQL queries")
     
     # Groq AI

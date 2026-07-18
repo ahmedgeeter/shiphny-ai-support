@@ -18,12 +18,14 @@ def get_llm_for_query(user_query: str):
         # Try OpenAI GPT-4o, fallback to Gemini 1.5 Pro
         if os.getenv("OPENAI_API_KEY"):
             return ChatOpenAI(model="gpt-4o", temperature=0)
+        elif os.getenv("GROQ_API_KEY"):
+            return ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
         else:
             return ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0)
     else:
         # Route to a fast, cheap model
         if os.getenv("GROQ_API_KEY"):
-            return ChatGroq(model="llama3-8b-8192", temperature=0)
+            return ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
         elif os.getenv("OPENAI_API_KEY"):
             return ChatOpenAI(model="gpt-4o-mini", temperature=0)
         else:

@@ -1,0 +1,8 @@
+model_list:
+  - model_name: llama-3.1-70b
+    litellm_params:
+      model: groq/llama-3.1-70b-versatile
+      api_key: "os.environ/GROQ_API_KEY"
+
+router_settings:
+  routing_strategy: usage-based-routing

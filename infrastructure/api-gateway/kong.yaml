@@ -1,0 +1,54 @@
+_format_version: "3.0"
+
+services:
+  - name: backend-service
+    url: http://backend:8000
+    routes:
+      - name: api-route
+        paths:
+          - /api
+        strip_path: false
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - Authorization
+          exposed_headers:
+            - Authorization
+          credentials: true
+          max_age: 3600
+      - name: rate-limiting
+        config:
+          minute: 100
+          policy: local
+
+  - name: frontend-service
+    url: http://frontend:80
+    routes:
+      - name: root-route
+        paths:
+          - /
+        strip_path: false
+
+  - name: litellm-service
+    url: http://litellm:4000
+    routes:
+      - name: litellm-route
+        paths:
+          - /llm
+        strip_path: true

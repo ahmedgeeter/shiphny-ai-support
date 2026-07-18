@@ -48,10 +48,9 @@ services:
       redis:
         condition: service_healthy
     command: >
-      sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
-    # Note: Volumes are removed here so we actually test the containerized code, 
-    # as expected for a pre-production local test using the production multi-stage image.
-    # If you need hot-reload for dev, you can override target: builder and add volumes.
+      sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    volumes:
+      - ./backend:/app
     
   frontend:
     build:

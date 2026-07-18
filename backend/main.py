@@ -5,7 +5,7 @@ FastAPI backend for AI customer support system
 
 # Load .env before any imports that use settings
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 import uvicorn
 from fastapi import FastAPI
@@ -88,6 +88,10 @@ async def get_config():
 
 
 # Include API routers — v5
+from app.api.auth_router import router as auth_router
+from app.api.admin_router import router as admin_router
+app.include_router(auth_router)
+app.include_router(admin_router)
 app.include_router(chat_router)
 app.include_router(analytics_router)
 app.include_router(customers_router)

@@ -11,206 +11,131 @@
                 |_|              |___/                                                     
 </pre>
 
-<h3>AI-Powered Enterprise Customer Support for Shipping</h3>
-<p><strong>Production-Grade | Microservices | Kubernetes EKS | GitOps | Terraform</strong></p>
+<h3>Next-Generation AI Support & Enterprise Logistics Platform</h3>
 
 <p>
-  <img src="https://img.shields.io/badge/AWS-EKS-FF9900?style=flat&logo=amazon-aws&logoColor=white" />
-  <img src="https://img.shields.io/badge/Terraform-1.9-844FBA?style=flat&logo=terraform&logoColor=white" />
-  <img src="https://img.shields.io/badge/ArgoCD-GitOps-EF7B4D?style=flat&logo=argo&logoColor=white" />
-  <img src="https://img.shields.io/badge/FastAPI-0.111-009688?style=flat&logo=fastapi&logoColor=white" />
-  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=black" />
+  <strong>Production-Ready Microservices • Kubernetes (AWS EKS) • GitOps • Terraform</strong>
 </p>
 
 <p>
-  <a href="#english">English</a> • <a href="#arabic">العربية</a>
+  <img src="https://img.shields.io/badge/AWS-EKS-FF9900?style=flat&logo=amazon-aws&logoColor=white" alt="AWS EKS" />
+  <img src="https://img.shields.io/badge/Terraform-1.9-844FBA?style=flat&logo=terraform&logoColor=white" alt="Terraform" />
+  <img src="https://img.shields.io/badge/ArgoCD-GitOps-EF7B4D?style=flat&logo=argo&logoColor=white" alt="ArgoCD" />
+  <img src="https://img.shields.io/badge/FastAPI-0.111-009688?style=flat&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=black" alt="React" />
 </p>
 
 </div>
 
 ---
 
-<a name="english"></a>
-# English Documentation
+## 🎯 Executive Summary
 
-## Executive Summary
+**Shiphny** is a modern, enterprise-grade logistics and AI support platform built to handle real-world scale. Designed with a clear separation of concerns, it seamlessly blends a powerful microservices backend with an intelligent LLM-driven customer support agent. 
 
-**Shiphny AI Support Agent** has evolved into a fully-fledged enterprise microservices architecture. Designed for Egyptian shipping companies, the system handles real-time multilingual conversations (Arabic/English) with an uncompromising focus on data security, zero-downtime deployments, and highly scalable infrastructure.
-
-This repository houses the entire Monorepo, including Backend, Frontend, Infrastructure as Code (IaC), and Kubernetes Manifests.
+Built from the ground up for high availability, zero-downtime deployments, and strict data security, Shiphny is engineered not just to work, but to scale reliably under enterprise workloads.
 
 ---
 
-## Technical Architecture & Infrastructure
+## 🏗 System Architecture
 
-We have migrated from traditional PaaS (Render/Vercel) to a robust **Enterprise Grade Infrastructure on AWS**.
-
-### System Design (Microservices)
+We employ a robust, loosely-coupled microservices architecture designed to prevent bottlenecks and ensure horizontal scalability.
 
 ```mermaid
 graph TD
-    User((Customer)) --> |HTTPS| Ingress[NGINX Ingress Controller]
+    User((Client / User)) --> |HTTPS / WAF| Ingress[NGINX Ingress]
     Ingress --> Frontend[Frontend React SPA]
-    Ingress --> Backend[FastAPI Backend API]
+    Ingress --> Backend[FastAPI Backend]
     
-    Backend --> |Read/Write| DB[(PostgreSQL DB)]
-    Backend --> |Task Queue| Redis[(Redis Broker)]
+    Backend --> |Sync / Async reads| DB[(PostgreSQL)]
+    Backend --> |Queue LLM queries| Redis[(Redis Message Broker)]
     
     Redis --> Worker[Celery Background Workers]
-    Worker --> |Process Heavy LLM Tasks| AI[Groq/Gemini APIs]
-    Worker --> DB
+    Worker --> |Process heavy LLM inference| AI[LLM Gateway Groq/Gemini]
+    Worker --> |Update status| DB
 ```
 
-### CI/CD & GitOps Pipeline
+### Why this architecture?
+- **Asynchronous AI Processing:** LLM inference is fundamentally slow and prone to rate limits. By offloading AI queries to **Celery + Redis**, the main FastAPI event loop remains unblocked, ensuring blazing-fast API response times even under heavy concurrent load.
+- **Stateless Services:** Both the FastAPI backend and Celery workers are completely stateless, meaning they can be scaled up or down instantly based on CPU/Memory metrics.
+- **Resiliency:** If an LLM provider goes down, Celery automatically retries without dropping customer requests.
 
-We implement a state-of-the-art **Push-to-Deploy GitOps Pipeline**.
+---
+
+## 🔒 The 5-Layer AI Defense System
+
+Exposing LLMs to public users carries inherent risks (e.g., prompt injection, PII leakage). We've engineered a rigorous defense-in-depth security model:
+
+1. **Global Injection Guard:** Sanitizes system override keywords before they ever reach the model.
+2. **Deterministic Response Builder:** Core identity verification (auth) is hardcoded securely in the backend. The AI *never* decides on its own if a user is authenticated.
+3. **Injection Marker Blocker:** Rejects known malicious user patterns dynamically.
+4. **Strict System Prompt Sandboxing:** Explicit constraints preventing the model from outputting anything outside its allowed domain knowledge.
+5. **System-Only Trust Verification:** Verification tags are only trusted if cryptographically generated by the backend system.
+
+---
+
+## 🚀 DevOps, CI/CD & GitOps
+
+We have moved past traditional CI/CD. Shiphny utilizes a state-of-the-art **Push-to-Deploy GitOps Pipeline**.
 
 1. **Continuous Integration (GitHub Actions):**
-   - Developer pushes code to `main`.
-   - GitHub Actions checks out the code, configures AWS credentials securely.
-   - Builds optimized, multi-stage Docker images for `backend` and `frontend`.
-   - Tags and pushes the images to **AWS ECR (Elastic Container Registry)**.
-   - Automatically updates the `values.yaml` in the Helm chart with the new image tags.
+   - On every push to `main`, GitHub Actions runs unit tests, linting, and builds multi-stage, highly optimized Docker images.
+   - Images are tagged with the Git SHA and pushed securely to **GitHub Container Registry (GHCR)**.
+   - The pipeline automatically updates the `values.yaml` in our Helm chart.
 
 2. **Continuous Deployment (ArgoCD):**
-   - **ArgoCD** runs inside the AWS EKS cluster.
-   - It continuously monitors this Git repository.
-   - Upon detecting the updated `values.yaml`, ArgoCD automatically syncs and deploys the new images to the Kubernetes cluster without zero downtime using Rolling Updates.
+   - **ArgoCD**, running inside the Kubernetes cluster, detects the drift in the Git repository.
+   - It automatically syncs the cluster state to match the repository, performing **Rolling Updates** to ensure zero downtime.
 
-### Infrastructure as Code (Terraform)
-
-All AWS infrastructure is managed declaratively via Terraform (`/infrastructure`):
-- **VPC & Networking:** Custom VPC with Public/Private subnets, NAT Gateways, and strict security groups.
-- **EKS Cluster (v1.30):** Managed Kubernetes cluster with auto-scaling Node Groups (`t3.large` instances).
-- **ECR Repositories:** Secure private container registries for storing microservice images.
-- **Remote State:** S3 Backend with DynamoDB state locking for team collaboration.
+3. **Infrastructure as Code (Terraform):**
+   - All AWS infrastructure is managed declaratively via `/infrastructure`.
+   - Provisions a custom VPC, NAT Gateways, EKS Cluster (managed node groups), and private container registries.
+   - Uses S3 remote state with DynamoDB locking to ensure safe team collaboration.
 
 ---
 
-## Security Implementation
+## 🛠 Technology Stack
 
-### 5-Layer AI Defense System
-1. **Global Injection Guard:** Sanitizes system override keywords.
-2. **Injection Marker Blocker:** Rejects malicious user patterns.
-3. **Deterministic Response Builder:** Identity verification is hardcoded in the backend — AI *never* decides to reveal PII.
-4. **AI System Prompt Rules:** Explicit restrictions against self-verification.
-5. **System-Only Trust:** Verification tags are only trusted if generated by the system.
-
-*(Security Test Coverage: 24/24 Penetration Tests Passing)*
-
----
-
-## Technology Stack
-
-| Domain | Technology | Purpose |
-|--------|------------|---------|
-| **Cloud Provider** | AWS (Amazon Web Services) | Enterprise hosting & scalability |
-| **Infrastructure** | Terraform | Infrastructure as Code (IaC) |
-| **Orchestration** | Kubernetes (EKS), Helm | Container orchestration & templating |
-| **CI/CD** | GitHub Actions, ArgoCD | GitOps automated deployments |
-| **Backend** | FastAPI, Celery, Python 3.11 | High-performance Async API |
-| **Database/Cache** | PostgreSQL, Redis | Persistent storage & Message brokering |
-| **Frontend** | React 18, TypeScript, Tailwind | Modern, responsive user interface |
+| Component | Technology | Why we chose it |
+|-----------|------------|-----------------|
+| **Frontend** | React 18, TypeScript, TailwindCSS, Framer Motion | Provides a highly responsive, type-safe, and visually stunning user experience. |
+| **Backend API** | FastAPI, Python 3.11, SQLAlchemy, Pydantic | Offers native async support, automatic OpenAPI docs, and exceptional performance. |
+| **Task Queue** | Celery, Redis | Decouples heavy AI inference from the main request-response cycle. |
+| **Database** | PostgreSQL | ACID compliant, highly reliable, and horizontally scalable for enterprise data. |
+| **Infrastructure** | AWS EKS, Terraform, Helm | Provides a predictable, declarative, and scalable cloud foundation. |
+| **CI/CD** | GitHub Actions, ArgoCD | Enables true GitOps, ensuring the cluster always matches the source of truth. |
 
 ---
 
-## Local Development (Docker Compose)
+## 💻 Local Development
 
-You can spin up the entire microservices stack locally with one command:
+Get the entire microservices stack running on your machine in under a minute using Docker Compose.
 
 ```bash
+# 1. Clone the repository
+git clone https://github.com/your-org/shiphny-ai-support.git
+
+# 2. Start the ecosystem
 docker-compose up --build
 ```
-*This will launch the Database, Redis, Celery Worker, Backend (Port 8000), and Frontend (Port 5173).*
+
+**What happens?**
+Docker Compose will orchestrate and launch:
+- **PostgreSQL** Database (Port 5432)
+- **Redis** Message Broker (Port 6379)
+- **Backend API** (FastAPI) on `http://localhost:8000`
+- **Frontend App** (React) on `http://localhost:3000`
+
+---
+
+## 📈 Scalability & Future Roadmap
+
+- **Event-Driven Microservices:** Transitioning completely from REST to Kafka for core domain events (Shipment Created, Delivered, etc.).
+- **Multi-Region Active-Active:** Expanding EKS clusters across multiple AWS availability zones for disaster recovery.
+- **Advanced RAG Analytics:** Implementing vector databases to give the support AI deep historical context on enterprise B2B clients.
 
 ---
 
 <div align="center">
-  <b><a href="#english">Back to Top</a></b>
-</div>
-
----
-
-<a name="arabic"></a>
-<div dir="rtl" align="right">
-
-# التوثيق العربي
-
-## ملخص تنفيذي
-
-تطور **نظام شحني للدعم الفني بالذكاء الاصطناعي** ليصبح بنية مؤسسية متكاملة للخدمات المصغرة (Microservices). تم تصميم النظام لشركات الشحن المصرية، حيث يتعامل مع المحادثات الفورية متعددة اللغات مع تركيز لا هوادة فيه على أمن البيانات، وتحديثات النظام بدون انقطاع (Zero-Downtime)، وبنية تحتية عالية التوسع.
-
-يحتوي هذا المستودع (Monorepo) على كل ما يخص المشروع: الواجهة الأمامية، الخلفية، البنية التحتية ككود (Terraform)، وملفات الكوبرنيتز (Helm Charts).
-
----
-
-## البنية التحتية والتقنية
-
-لقد انتقلنا من الاستضافات التقليدية إلى **بنية تحتية بمستوى المؤسسات الكبرى على سحابة AWS**.
-
-### تصميم النظام (الخدمات المصغرة)
-
-- يتم استقبال طلبات العميل عبر **NGINX Ingress Controller**.
-- يتم توجيه الطلبات إما إلى **الواجهة الأمامية (React)** أو **واجهة برمجة التطبيقات (FastAPI)**.
-- تعتمد الخلفية على قاعدة بيانات **PostgreSQL** لحفظ البيانات بشكل آمن.
-- لضمان سرعة الرد وعدم تعليق الخادم، يتم إرسال مهام الذكاء الاصطناعي الثقيلة إلى **Redis** ليقوم الـ **Celery Worker** بمعالجتها في الخلفية.
-
-### خط أنابيب النشر المستمر (CI/CD & GitOps)
-
-نحن نطبق أحدث معايير الـ **GitOps** للنشر التلقائي:
-
-1. **التكامل المستمر (GitHub Actions):**
-   - بمجرد رفع أي كود جديد إلى `main`، يبدأ الـ Pipeline بالعمل.
-   - يقوم ببناء صور (Docker Images) مُحسّنة وخفيفة جداً.
-   - يرفع الصور إلى خزنة **AWS ECR** الخاصة بنا بشكل آمن.
-   - يقوم بتحديث ملفات الـ Helm Chart تلقائياً بالنسخ الجديدة.
-
-2. **النشر المستمر (ArgoCD):**
-   - يعمل **ArgoCD** كـ "مراقب" داخل سيرفرات Kubernetes.
-   - بمجرد أن يلاحظ تحديثاً في الكود على GitHub، يقوم بسحب الصور الجديدة ونشرها على السيرفرات تدريجياً (Rolling Update) بحيث لا يلاحظ العميل أي انقطاع في الخدمة!
-
-### البنية التحتية ككود (Terraform)
-
-تتم إدارة جميع موارد AWS بالكامل برمجياً عبر Terraform:
-- **الشبكات (VPC):** شبكات خاصة وعامة مع بوابات حماية صارمة.
-- **مجموعة الخوادم (EKS):** سيرفرات Kubernetes مُدارة آلياً (نسخة 1.30) مع خاصية التوسع التلقائي لتتحمل أي ضغط.
-- **التخزين المؤمّن:** حفظ حالة البنية التحتية على AWS S3 مع قفل التعديلات المشتركة عبر DynamoDB.
-
----
-
-## الأمان والحماية
-
-يحتوي النظام على 5 طبقات دفاعية تضمن عدم قيام الذكاء الاصطناعي بتسريب بيانات الشحنات الخاصة للعملاء إطلاقاً (تم اجتياز 24 اختبار اختراق بنجاح تام).
-
----
-
-## مكدس التقنيات (Tech Stack)
-
-| المجال | التقنية | الغرض |
-|--------|---------|--------|
-| **السحابة** | AWS | استضافة مؤسسية قابلة للتوسع |
-| **البنية التحتية** | Terraform | برمجة وأتمتة البنية التحتية |
-| **التوزيع** | Kubernetes, Helm | إدارة الحاويات وضمان استقرارها |
-| **CI/CD** | GitHub Actions, ArgoCD | أتمتة النشر عبر منهجية GitOps |
-| **الخلفية** | FastAPI, Celery, Python | واجهة برمجية فائقة السرعة |
-| **قواعد البيانات** | PostgreSQL, Redis | حفظ البيانات وإدارة طوابير المهام |
-| **الواجهة الأمامية** | React 18, TypeScript | واجهة مستخدم عصرية وسريعة |
-
----
-
-## التطوير المحلي
-
-يمكنك تشغيل بيئة المشروع بالكامل على جهازك بأمر واحد فقط:
-
-```bash
-docker-compose up --build
-```
-*سيقوم هذا الأمر بتشغيل: قاعدة البيانات، Redis، عمال Celery، واجهة الـ API، والواجهة الأمامية للمستخدم دفعة واحدة.*
-
----
-
-<div align="center">
-  <b><a href="#arabic">العودة إلى الأعلى</a></b>
-</div>
-
+  <i>Built with absolute focus on engineering excellence.</i>
 </div>

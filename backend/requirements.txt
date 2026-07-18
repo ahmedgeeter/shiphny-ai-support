@@ -1,28 +1,35 @@
 # Core
-fastapi==0.111.0
-uvicorn[standard]==0.29.0
-python-dotenv==1.0.1
-pydantic==2.7.1
-pydantic-settings==2.2.1
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
+pydantic-settings
+email-validator
 
 # Database
-sqlalchemy==2.0.30
-aiosqlite==0.20.0
+sqlalchemy
+aiosqlite
+redis
+alembic
+asyncpg
+psycopg2-binary
 
 # AI
-httpx==0.27.0
-langchain==0.2.14
-langchain-core==0.2.33
-langgraph==0.2.2
-langfuse==2.44.1
-langchain-groq==0.1.9
-langchain-openai==0.1.22
-langchain-google-genai==1.0.8
+httpx
+langchain
+langchain-core
+langgraph
+langfuse
+langchain-groq
+langchain-openai
+langchain-google-genai
 
-# Database / Cache
-redis==5.0.8
-alembic==1.13.1
-asyncpg==0.29.0
+# Agents and Gateways
+deerflow
+litellm
+aegra-api
 
 # Utilities
 aiofiles==23.2.1
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0

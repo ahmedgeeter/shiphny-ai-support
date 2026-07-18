@@ -14,6 +14,7 @@ export const translations = {
       support: 'الدعم الفني',
       trackButton: 'تتبع شحنتك',
       langSwitcher: 'EN',
+      login: 'دخول',
     },
     home: {
       badge: 'نخدم جميع أنحاء مصر',
@@ -183,6 +184,7 @@ export const translations = {
       support: 'Support',
       trackButton: 'Track Now',
       langSwitcher: 'عربي',
+      login: 'Login',
     },
     home: {
       badge: 'Serving all of Egypt',
