@@ -37,22 +37,17 @@ export function AuthPanel({ isOpen, onClose, t, lang, onToast, onLoginSuccess }:
         if (res.ok) {
           const data = await res.json()
           localStorage.setItem('token', data.access_token)
-          
-          // Fetch user info to get role
-          const meRes = await fetch(`${API_BASE}/api/auth/me`, {
-            headers: { 'Authorization': `Bearer ${data.access_token}` }
-          })
-          let role = 'customer'
-          if (meRes.ok) {
-            const meData = await meRes.json()
-            role = meData.role
-          }
+          localStorage.setItem('role', data.role)
+          localStorage.setItem('user_id', String(data.user_id))
+          localStorage.setItem('full_name', data.full_name)
 
           onToast({ message: lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Logged in successfully!', type: 'success' })
           onClose()
-          if (onLoginSuccess) onLoginSuccess(role)
+          if (onLoginSuccess) onLoginSuccess(data.role)
         } else {
-          throw new Error('Login failed')
+          const errData = await res.json().catch(() => ({}))
+          const msg = errData.detail || 'Login failed'
+          throw new Error(msg)
         }
       } else {
         const res = await fetch(`${API_BASE}/api/auth/register`, {

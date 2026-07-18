@@ -61,7 +61,13 @@ async def login(form_data: LoginRequest, db: AsyncSession = Depends(get_db)) -> 
         raise HTTPException(status_code=400, detail="Inactive user")
         
     access_token = create_access_token(subject=user.id)
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "role": user.role.value,          # ← tell frontend the role immediately
+        "full_name": user.full_name or "",
+        "user_id": user.id,
+    }
 
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: Customer = Depends(get_current_active_user)) -> Any:
