@@ -1,7 +1,8 @@
 import { API_BASE } from '../utils/constants'
 import React, { useState, useRef, useEffect } from 'react'
 import { Send, User, Headphones, Loader2, AlertCircle, MessageCircle, X } from 'lucide-react'
-import { Language, translations } from '../translations'
+import { Language } from '../translations'
+import { sendGroqMessage, ChatMessage } from '../services/groqChat'
 
 interface Message {
   id: string
@@ -13,6 +14,8 @@ interface Message {
 interface ChatWidgetProps {
   apiStatus: 'checking' | 'online' | 'offline'
 }
+
+const GROQ_KEY = import.meta.env.VITE_GROQ_API_KEY as string | undefined
 
 export function ChatWidget({ apiStatus }: ChatWidgetProps) {
   const [messages, setMessages] = useState<Message[]>([
@@ -27,6 +30,7 @@ export function ChatWidget({ apiStatus }: ChatWidgetProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [groqHistory, setGroqHistory] = useState<ChatMessage[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -45,22 +49,46 @@ export function ChatWidget({ apiStatus }: ChatWidgetProps) {
     }
 
     setMessages(prev => [...prev, userMessage])
+    const userText = input.trim()
     setInput('')
     setIsLoading(true)
     setError(null)
 
-    try {
-      const token = localStorage.getItem('token');
-      const headers: HeadersInit = { 'Content-Type': 'application/json' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+    // ── Strategy: try Groq direct first (if key available), then backend ──
+    if (GROQ_KEY) {
+      try {
+        const reply = await sendGroqMessage(userText, groqHistory, 'ar')
+        const newHistory: ChatMessage[] = [
+          ...groqHistory,
+          { role: 'user', content: userText },
+          { role: 'assistant', content: reply }
+        ]
+        setGroqHistory(newHistory)
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: reply,
+          timestamp: new Date()
+        }])
+        setIsLoading(false)
+        return
+      } catch (groqErr) {
+        console.warn('[ChatWidget] Groq direct failed, falling back to backend:', groqErr)
+        // fall through to backend
       }
+    }
+
+    // ── Fallback: backend API ──
+    try {
+      const token = localStorage.getItem('token')
+      const headers: HeadersInit = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
 
       const response = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          message: userMessage.content,
+          message: userText,
           customer_id: 1,
           session_id: sessionId,
           language: 'ar'
@@ -84,8 +112,6 @@ export function ChatWidget({ apiStatus }: ChatWidgetProps) {
     }
   }
 
-  const isOffline = apiStatus === 'offline'
-
   return (
     <div className="w-full max-w-2xl mx-auto h-[min(580px,calc(100vh-12rem))] bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
       {/* Header */}
@@ -97,8 +123,8 @@ export function ChatWidget({ apiStatus }: ChatWidgetProps) {
           <div>
             <h2 className="text-base sm:text-lg font-semibold text-white">سارة - مساعدة العملاء</h2>
             <p className="text-white/80 text-xs sm:text-sm flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${isOffline ? 'bg-red-300' : 'bg-green-400 animate-pulse'}`} />
-              {isOffline ? 'غير متصل' : 'متصل الآن · دعم 24/7'}
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              متصل الآن · دعم 24/7
             </p>
           </div>
         </div>
@@ -145,9 +171,9 @@ export function ChatWidget({ apiStatus }: ChatWidgetProps) {
       <div className="flex-shrink-0 px-3 py-2 bg-white border-t border-gray-100 flex gap-2 overflow-x-auto">
         {[
           { text: '📦 تتبع شحنة', q: 'كيف أتابع شحنتي؟' },
-          { text: '💰 الأسعار', q: 'كم سعر الشحن؟' },
-          { text: '🗺️ التغطية', q: 'هل توصلون لأسوان؟' },
-          { text: '🔄 الإرجاع', q: 'كيف أرجع شحنة؟' },
+          { text: '💰 الأسعار',   q: 'كم سعر الشحن؟' },
+          { text: '🗺️ التغطية',  q: 'هل توصلون لأسوان؟' },
+          { text: '🔄 الإرجاع',  q: 'كيف أرجع شحنة؟' },
         ].map((item, i) => (
           <button key={i} onClick={() => setInput(item.q)} className="px-3 py-1.5 bg-gray-100 hover:bg-red-50 text-gray-700 hover:text-red-700 text-xs rounded-full whitespace-nowrap border border-gray-200 hover:border-red-200 transition-all flex-shrink-0">
             {item.text}
@@ -157,26 +183,19 @@ export function ChatWidget({ apiStatus }: ChatWidgetProps) {
 
       {/* Input */}
       <div className="flex-shrink-0 p-3 sm:p-4 bg-white border-t border-gray-200">
-        {isOffline ? (
-          <div className="flex items-center gap-2 text-gray-500 text-sm py-1">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>السيرفر غير متصل. يرجى تشغيل Backend أولاً.</span>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="flex gap-2 flex-row-reverse">
-            <input
-              type="text"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              placeholder="اكتب رسالتك..."
-              className="flex-1 min-w-0 px-3 sm:px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-sm text-right focus:outline-none focus:ring-2 focus:ring-red-400"
-            />
-            <button type="submit" disabled={!input.trim() || isLoading} className="flex-shrink-0 px-3 sm:px-5 py-2.5 text-white bg-red-600 rounded-xl font-medium disabled:opacity-40 transition-all flex items-center gap-2 hover:opacity-90 active:scale-95">
-              <Send className="w-4 h-4" />
-              <span className="hidden sm:inline">إرسال</span>
-            </button>
-          </form>
-        )}
+        <form onSubmit={handleSubmit} className="flex gap-2 flex-row-reverse">
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            placeholder="اكتب رسالتك..."
+            className="flex-1 min-w-0 px-3 sm:px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-sm text-right focus:outline-none focus:ring-2 focus:ring-red-400"
+          />
+          <button type="submit" disabled={!input.trim() || isLoading} className="flex-shrink-0 px-3 sm:px-5 py-2.5 text-white bg-red-600 rounded-xl font-medium disabled:opacity-40 transition-all flex items-center gap-2 hover:opacity-90 active:scale-95">
+            <Send className="w-4 h-4" />
+            <span className="hidden sm:inline">إرسال</span>
+          </button>
+        </form>
       </div>
     </div>
   )
@@ -188,8 +207,8 @@ export function PersistentChat({ apiStatus, lang }: { apiStatus: 'checking' | 'o
 
   return (
     <div className={`fixed bottom-6 ${isRtl ? 'left-6' : 'right-6'} z-[100]`}>
-      <button 
-        onClick={() => setIsOpen(!isOpen)} 
+      <button
+        onClick={() => setIsOpen(!isOpen)}
         className="w-14 h-14 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg hover:shadow-red-500/30 hover:scale-105 active:scale-95 transition-all"
       >
         {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
