@@ -9,4 +9,4 @@ export const C = {
 
 export type Page = 'home' | 'tracking' | 'services' | 'about' | 'contact' | 'support' | 'dashboard' | 'admin'
 export type Language = 'ar' | 'en'
-export const API_BASE = 'http://localhost:8000'
+export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
