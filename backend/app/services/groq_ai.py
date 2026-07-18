@@ -357,7 +357,7 @@ class GroqAIService:
 
     def _build_system_prompt(
         self,
-        customer_context: Dict[str, Any],
+        customer_context: dict,
         detected_lang: str = None,
         recent_bookings_text: str = "",
         identity_verified: bool = False,
@@ -365,84 +365,67 @@ class GroqAIService:
     ) -> str:
         """Build professional system prompt for Sara - Shiphny AI Agent."""
 
-        customer_name = customer_context.get("name", "العميل" if detected_lang != "en" else "Customer")
+        customer_name = customer_context.get("name", "Customer")
         language = detected_lang or customer_context.get("language", "ar")
-
-        # Choose knowledge base based on language
         kb = KNOWLEDGE_BASE_AR if language == "ar" else KNOWLEDGE_BASE_EN
-
-        # Live bookings — only shown after identity is verified
         bookings_section = recent_bookings_text if (recent_bookings_text and identity_verified) else ""
 
+        verified_block = ""
+        if identity_verified and verified_ref and bookings_section:
+            verified_block = (
+                f"\n=== SHIPMENT DETAILS FOR {verified_ref} (show immediately) ===\n"
+                f"{bookings_section}\n"
+                f"=== END SHIPMENT DETAILS ===\n"
+            )
+
         if language == "ar":
-            if identity_verified and bookings_section:
-                ref_note = f" للشحنة {verified_ref}" if verified_ref else ""
-                verification_status = f"""\n=== [VERIFIED:{verified_ref or ''}] — تم التحقق من الهوية{ref_note} ===
-تم التحقق بنجاح عبر النظام. اعرض تفاصيل الشحنة الموجودة في قسم [تفاصيل الشحنة] بشكل واضح.
-"""
-            elif identity_verified and verified_ref:
-                verification_status = f"\n=== [VERIFIED:{verified_ref}] — تم التحقق من هوية العميل للشحنة {verified_ref} — لكن بيانات الشحنة غير متاحة. أخبر العميل بصدق أنه تم التحقق وستحضر البيانات فوراً.\n"
-            else:
-                verification_status = ""
-
-            verification_rules = """
-=== سياسة التحقق من الهوية ===
-
-هذه القاعدة تنطبق فقط على أسئلة تتبع شحنة بعينها أو عرض بياناتها الخاصة.
-للأسئلة العامة (أسعار، مناطق التغطية، أوقات التوصيل، سياسة الإرجاع، مواصفات الخدمات) → أجب مباشرة بدون طلب أي تحقق.
-
-متى تطلب التحقق فقط:
-إذا طلب العميل معرفة حالة شحنة معينة أو تفاصيلها الخاصة (الموقع، الوقت، المرسَل إليه، إلخ).
-
-إجراء التتبع:
-1. إذا لم يذكر رقم الشحنة (يبدأ بـ SH-) → اطلبه.
-2. بعد ذكر الرقم → اطلب بيانات التحقق بإحدى الطرق:
-   • آخر 4 أرقام من رقم الموبايل المسجّل
-   • الاسم الأول والثاني كما هو مسجَّل
-   • البريد الإلكتروني المسجَّل مع الشحنة
-3. إذا جاءك [VERIFIED:رقمالشحنة] في السياق → أظهر تفاصيل الشحنة بشكل ودي.
-4. لا تخترع تفاصيل شحنة ولا تفترض أي معلومة خاصة بالعميل.
-"""
-            prompt = f"""أنت سارة، موظفة خدمة عملاء شركة شحني للشحن في مصر. العميل: {customer_name}.
-ردودك: قصيرة، ودية، بالعربية المصرية، بالإيموجي المناسب.
-لا تخترع معلومات — استخدم قاعدة المعلومات فقط. للأسئلة الخارجة عن نطاقك: حوّل للخط الساخن 19282.
-{verification_rules}
-{verification_status}
-{kb}
-{bookings_section}"""
+            prompt = (
+                f"\u0623\u0646\u062a \u0633\u0627\u0631\u0629\u060c \u0645\u0648\u0638\u0641\u0629 \u062e\u062f\u0645\u0629 \u0639\u0645\u0644\u0627\u0621 \u0634\u0631\u0643\u0629 \u0634\u062d\u0646\u064a. \u0627\u0644\u0639\u0645\u064a\u0644: {customer_name}.\n"
+                "\n"
+                "\u0642\u0648\u0627\u0639\u062f:\n"
+                "- \u0631\u062f\u0648\u062f\u0643 \u0642\u0635\u064a\u0631\u0629 \u0648\u0648\u062f\u064a\u0629 \u0628\u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u0627\u0644\u0645\u0635\u0631\u064a\u0629 \u0645\u0639 \u0625\u064a\u0645\u0648\u062c\u064a \u0645\u0646\u0627\u0633\u0628.\n"
+                "- \u0627\u0633\u062a\u062e\u062f\u0645 \u0645\u0639\u0644\u0648\u0645\u0627\u062a \u0642\u0627\u0639\u062f\u0629 \u0627\u0644\u0645\u0639\u0631\u0641\u0629 \u0641\u0642\u0637.\n"
+                "- \u0644\u0644\u0623\u0633\u0626\u0644\u0629 \u062e\u0627\u0631\u062c \u0646\u0637\u0627\u0642\u0643: \u062d\u0648\u0651\u0644 \u0644\u0644\u062e\u0637 \u0627\u0644\u0633\u0627\u062e\u0646 19282.\n"
+                "\n"
+                "=== \u0642\u0627\u0639\u062f\u0629 \u0623\u0633\u0627\u0633\u064a\u0629 ===\n"
+                "\n"
+                "\u2705 \u0627\u0644\u0623\u0633\u0626\u0644\u0629 \u0627\u0644\u0639\u0627\u0645\u0629 (\u0623\u0633\u0639\u0627\u0631\u060c \u0645\u0646\u0627\u0637\u0642\u060c \u0645\u0648\u0627\u0639\u064a\u062f\u060c \u062f\u0641\u0639\u060c \u0625\u0631\u062c\u0627\u0639\u060c \u062e\u062f\u0645\u0627\u062a\u060c \u0645\u0639\u0644\u0648\u0645\u0627\u062a \u0639\u0627\u0645\u0629):\n"
+                "   \u0623\u062c\u0628 \u0641\u0648\u0631\u0627\u064b \u0628\u062f\u0648\u0646 \u0637\u0644\u0628 \u0623\u064a \u0628\u064a\u0627\u0646\u0627\u062a.\n"
+                "\n"
+                "\U0001f512 \u062a\u062a\u0628\u0639 \u0634\u062d\u0646\u0629 \u0628\u0639\u064a\u0646\u0647\u0627 \u0641\u0642\u0637:\n"
+                "   - \u0625\u0630\u0627 \u0630\u0643\u0631 \u0631\u0642\u0645 SH-: \u0627\u0637\u0644\u0628 \u0627\u0644\u062a\u062d\u0642\u0642.\n"
+                "   - \u0625\u0630\u0627 \u0644\u0645 \u064a\u0630\u0643\u0631: \u0627\u0637\u0644\u0628 \u0631\u0642\u0645 \u0627\u0644\u0634\u062d\u0646\u0629.\n"
+                "   - \u0644\u0627 \u062a\u062e\u062a\u0631\u0639 \u0628\u064a\u0627\u0646\u0627\u062a \u0634\u062d\u0646\u0629.\n"
+                f"\n{verified_block}\n"
+                f"{kb}"
+            )
         else:
-            if identity_verified and bookings_section:
-                ref_note_en = f" for shipment {verified_ref}" if verified_ref else ""
-                verification_status = f"\n=== [VERIFIED:{verified_ref or ''}] — Identity Confirmed{ref_note_en} ===\nSystem confirmed identity. Show shipment details from [SHIPMENT DETAILS] section below.\n"
-            elif identity_verified and verified_ref:
-                verification_status = f"\n=== [VERIFIED:{verified_ref}] — Identity confirmed for {verified_ref} — details loading. Tell customer verification succeeded and details are coming.\n"
-            else:
-                verification_status = ""
-
-            verification_rules = """
-=== Identity Verification Policy ===
-
-This policy ONLY applies when a customer asks about the status or private details of a specific shipment.
-For ALL general questions (pricing, coverage areas, delivery times, return policy, services) → answer directly WITHOUT asking for any verification.
-
-When to request verification:
-Only when the customer wants to track a specific shipment or see its private details.
-
-Tracking process:
-1. If no SH- reference given → ask for it.
-2. Once reference given → ask to verify identity via ONE of:
-   • Last 4 digits of registered mobile
-   • First and last name as registered
-   • Email address registered with the shipment
-3. If you see [VERIFIED:ref] in the context → show full shipment details warmly.
-4. NEVER invent or guess private shipment details.
-"""
-            prompt = f"""You are Sara, a customer service agent at Shiphny Express (Egypt shipping company). Customer: {customer_name}.
-Be friendly, concise, use emojis. Only use info from knowledge base. For out-of-scope questions refer to hotline 19282.
-{verification_rules}
-{verification_status}
-{kb}
-{bookings_section}"""
+            prompt = (
+                f"You are Sara, a professional customer service agent at Shiphny Express (Egypt shipping). Customer: {customer_name}.\n"
+                "\n"
+                "Rules:\n"
+                "- Be friendly, concise, use emojis.\n"
+                "- Only use info from the knowledge base below.\n"
+                "- Out-of-scope: refer to hotline 19282.\n"
+                "\n"
+                "=== CRITICAL RULE ===\n"
+                "\n"
+                "ANSWER GENERAL QUESTIONS IMMEDIATELY - no personal info needed:\n"
+                "- Pricing questions -> answer directly\n"
+                "- Coverage area questions -> answer directly\n"
+                "- Delivery time questions -> answer directly\n"
+                "- Payment method questions -> answer directly\n"
+                "- Return policy questions -> answer directly\n"
+                "- Company info questions -> answer directly\n"
+                "- Service questions -> answer directly\n"
+                "\n"
+                "ONLY ask for verification when tracking a SPECIFIC shipment the customer owns:\n"
+                "- If they give SH- number -> ask for identity verification\n"
+                "- If no SH- number -> ask for it first\n"
+                "- NEVER invent or guess shipment details\n"
+                f"\n{verified_block}\n"
+                f"{kb}"
+            )
 
         return prompt
 
