@@ -35,7 +35,7 @@ export function ChatWidget({ apiStatus }: ChatWidgetProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim() || isLoading || apiStatus !== 'online') return
+    if (!input.trim() || isLoading) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
