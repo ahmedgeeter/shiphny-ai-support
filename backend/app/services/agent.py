@@ -10,6 +10,7 @@ try:
     from app.services.tools.shipment_tools import get_shipment_status, cancel_shipment, verify_and_get_shipment
     from app.services.tools.billing_tools import get_billing_info
     from app.services.tools.customer_tools import search_customer
+    from app.services.tools.kb_tools import search_knowledge_base
     from app.services.router import get_llm_for_query
     _ai_available = True
 except ImportError:
@@ -31,7 +32,7 @@ def _build_graph():
     class AgentState(TypedDict):
         messages: Annotated[list[BaseMessage], add_messages]
 
-    tools = [get_shipment_status, verify_and_get_shipment, cancel_shipment, get_billing_info, search_customer]
+    tools = [get_shipment_status, verify_and_get_shipment, cancel_shipment, get_billing_info, search_customer, search_knowledge_base]
 
     def call_model(state: AgentState):
         messages = state["messages"]

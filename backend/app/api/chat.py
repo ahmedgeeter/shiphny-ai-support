@@ -108,7 +108,8 @@ async def chat(
                     f"2. If they ask about a shipment NOT in their list (or ask for more details than what is shown), you MUST use the 'get_shipment_status' tool. "
                     f"IF the tool says the shipment exists, you MUST then ask the user to verify their identity (Email, Phone, or Name). "
                     f"IF the tool says the shipment does not exist, tell the user politely and STOP. Do NOT ask for verification.\n"
-                    f"3. Once the user replies with verification data, you MUST use the 'verify_and_get_shipment' tool, passing their reply. NEVER HALLUCINATE data. Only rely on tool responses."
+                    f"3. Once the user replies with verification data, you MUST use the 'verify_and_get_shipment' tool, passing their reply. NEVER HALLUCINATE data. Only rely on tool responses.\n"
+                    f"4. If the user asks general questions (e.g. shipping rates, return policy, allowed items, contact info), use the 'search_knowledge_base' tool. Do NOT guess."
                 )
             messages_to_send.append(("system", system_msg))
         else:
@@ -118,7 +119,8 @@ async def chat(
                 f"IF the tool says the shipment exists, you MUST ask the user to provide their Name, Phone, or Email for verification. "
                 f"IF the tool says the shipment does not exist, tell the user politely and STOP. Do NOT ask for verification.\n"
                 f"Once they provide verification data, you MUST use the 'verify_and_get_shipment' tool, passing their reply. "
-                f"NEVER HALLUCINATE data. Only rely on the tool responses. If verification fails, tell the user politely."
+                f"NEVER HALLUCINATE data. Only rely on the tool responses. If verification fails, tell the user politely.\n"
+                f"If the user asks general questions (prices, policies, support), use the 'search_knowledge_base' tool."
             )
             messages_to_send.append(("system", system_msg))
             
