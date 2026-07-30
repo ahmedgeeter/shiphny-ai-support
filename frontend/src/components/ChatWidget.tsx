@@ -2,7 +2,6 @@ import { API_BASE } from '../utils/constants'
 import React, { useState, useRef, useEffect } from 'react'
 import { Send, User, Headphones, Loader2, AlertCircle, MessageCircle, X } from 'lucide-react'
 import { Language } from '../translations'
-import { sendGroqMessage, ChatMessage } from '../services/groqChat'
 
 interface Message {
   id: string
@@ -15,7 +14,6 @@ interface ChatWidgetProps {
   apiStatus: 'checking' | 'online' | 'offline'
 }
 
-const GROQ_KEY = import.meta.env.VITE_GROQ_API_KEY as string | undefined
 
 export function ChatWidget({ apiStatus }: ChatWidgetProps) {
   const [messages, setMessages] = useState<Message[]>([
@@ -30,7 +28,6 @@ export function ChatWidget({ apiStatus }: ChatWidgetProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [groqHistory, setGroqHistory] = useState<ChatMessage[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -54,31 +51,7 @@ export function ChatWidget({ apiStatus }: ChatWidgetProps) {
     setIsLoading(true)
     setError(null)
 
-    // ── Strategy: try Groq direct first (if key available), then backend ──
-    if (GROQ_KEY) {
-      try {
-        const reply = await sendGroqMessage(userText, groqHistory, 'ar')
-        const newHistory: ChatMessage[] = [
-          ...groqHistory,
-          { role: 'user', content: userText },
-          { role: 'assistant', content: reply }
-        ]
-        setGroqHistory(newHistory)
-        setMessages(prev => [...prev, {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: reply,
-          timestamp: new Date()
-        }])
-        setIsLoading(false)
-        return
-      } catch (groqErr) {
-        console.warn('[ChatWidget] Groq direct failed, falling back to backend:', groqErr)
-        // fall through to backend
-      }
-    }
-
-    // ── Fallback: backend API ──
+    // ── Call Backend API ──
     try {
       const token = localStorage.getItem('token')
       const headers: HeadersInit = { 'Content-Type': 'application/json' }
