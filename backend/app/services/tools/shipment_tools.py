@@ -31,7 +31,7 @@ async def get_shipment_status(tracking_number: str) -> str:
     import re
     tracking_number = re.sub(r'[^A-Z0-9-]', '', tracking_number.upper())
     try:
-        async with AsyncSessionLocal() as session:
+        async with AsyncSessionLocal()() as session:
             # Check Shipment (SHP-...)
             result = await session.execute(
                 select(Shipment.id).where(Shipment.tracking_number.ilike(f"%{tracking_number}%"))
@@ -73,7 +73,7 @@ async def verify_and_get_shipment(tracking_number: str, verification_value: str)
     import re
     tracking_number = re.sub(r'[^A-Z0-9-]', '', tracking_number.upper())
     try:
-        async with AsyncSessionLocal() as session:
+        async with AsyncSessionLocal()() as session:
             # Try Shipment first
             result = await session.execute(
                 select(Shipment).options(selectinload(Shipment.customer)).where(Shipment.tracking_number.ilike(f"%{tracking_number}%"))
@@ -166,7 +166,7 @@ async def cancel_shipment(tracking_number: str) -> str:
         or an error message if the shipment was not found.
     """
     try:
-        async with AsyncSessionLocal() as session:
+        async with AsyncSessionLocal()() as session:
             result = await session.execute(
                 select(Shipment).where(Shipment.tracking_number == tracking_number)
             )
