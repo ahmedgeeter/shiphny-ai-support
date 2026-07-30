@@ -14,7 +14,7 @@
 <h3>DevOps & Cloud Native Portfolio Showcase</h3>
 
 <p>
-  <strong>Kubernetes (EKS) • Terraform • Helm • GitHub Actions (CI/CD) • Docker Compose</strong>
+  <strong>Kubernetes (EKS) | Terraform | Helm | GitHub Actions (CI/CD) | Docker Compose</strong>
 </p>
 
 <p>
@@ -29,83 +29,83 @@
 
 ---
 
-## 🎯 Project Purpose
+## Project Overview
 
-**This repository is a comprehensive DevOps engineering portfolio showcase.** 
-It demonstrates the ability to architect, provision, and deploy a production-grade, highly available microservices application using modern cloud-native tools.
+This repository serves as a comprehensive DevOps engineering portfolio showcase. It demonstrates the ability to architect, provision, and deploy a production-grade, highly available microservices application using modern cloud-native tools and practices.
 
-While the underlying application is a functional AI-powered logistics support bot, the true highlight of this repository is the **infrastructure automation, CI/CD pipelines, and Kubernetes orchestration.**
-
----
-
-## 🏗 Infrastructure as Code (Terraform)
-
-The `infrastructure/` directory contains declarative Terraform code designed for **AWS**. 
-*(Note: These are production-grade templates and are not meant to be applied unless you intend to provision real, paid AWS resources).*
-
-- **VPC & Networking:** Custom VPC with public, private, and intra subnets. Includes cost-optimized single NAT Gateways.
-- **EKS Cluster:** Managed Kubernetes cluster (v1.30) with dynamically scaling node groups.
-- **ECR:** Elastic Container Registry for secure image hosting.
-- **State Management:** S3 backend with DynamoDB state locking for team collaboration.
+While the underlying application is a functional AI-powered logistics support bot, the primary focus of this repository is the infrastructure automation, CI/CD pipelines, and Kubernetes orchestration. It is designed to reflect enterprise-level standards.
 
 ---
 
-## 🚀 Kubernetes & GitOps (Helm & ArgoCD)
+## Infrastructure as Code (Terraform)
 
-The `k8s/` directory contains the deployment manifests.
+The `infrastructure/` directory contains declarative Terraform code designed for AWS. Please note that these are production-grade templates and are not meant to be applied unless you intend to provision real, paid AWS resources.
 
-- **Helm Charts (`k8s/helm/shippny`):**
-  - Parameterized deployments for Frontend, Backend, and Background Workers.
-  - **Horizontal Pod Autoscaler (HPA):** Dynamically scales replicas between 2 and 5 based on CPU utilization (target 80%).
-  - Configurable resource requests and limits.
-- **ArgoCD:** Application manifests ready for pull-based GitOps deployment.
-
----
-
-## ⚙️ CI/CD Pipeline (GitHub Actions)
-
-The `.github/workflows/ci-cd.yaml` file defines a fully automated pipeline:
-- **Build & Push:** Uses Docker Buildx to compile highly optimized, multi-stage Docker images for both the React frontend and FastAPI backend.
-- **GHCR Integration:** Pushes images securely to the GitHub Container Registry.
-- **Manifest Updates:** Automatically patches the Helm `values.yaml` with the latest Git SHA to trigger ArgoCD syncs.
+*   **VPC and Networking:** Provisions a custom Virtual Private Cloud (VPC) with public, private, and intra subnets. It includes cost-optimized, highly available NAT Gateways.
+*   **EKS Cluster:** Sets up a managed Kubernetes cluster (v1.30) with dynamically scaling node groups to handle varying workloads efficiently.
+*   **Elastic Container Registry (ECR):** Configures secure image hosting repositories.
+*   **State Management:** Utilizes an S3 backend with DynamoDB state locking to ensure safe, concurrent team collaboration.
 
 ---
 
-## 👨‍💻 Recruiter / Local Evaluation Guide (Free & Easy)
+## Kubernetes and GitOps (Helm and ArgoCD)
 
-You can run the entire microservices stack (Frontend, Backend, PostgreSQL, Redis) locally on your machine for free in just a few minutes using **Docker Compose**.
+The `k8s/` directory contains the deployment manifests necessary for orchestrating the containers.
+
+*   **Helm Charts (`k8s/helm/shippny`):**
+    *   Provides parameterized deployments for the Frontend, Backend, and Background Workers.
+    *   **Horizontal Pod Autoscaler (HPA):** Dynamically scales application replicas between 2 and 5 based on CPU utilization, targeting an 80% threshold.
+    *   Features highly configurable resource requests and limits to ensure cluster stability.
+*   **ArgoCD Integration:** The application manifests are structured and ready for a pull-based GitOps deployment workflow.
+
+---
+
+## CI/CD Pipeline (GitHub Actions)
+
+The `.github/workflows/ci-cd.yaml` file defines a fully automated, continuous integration and deployment pipeline:
+
+*   **Build and Push:** Leverages Docker Buildx to compile highly optimized, multi-stage Docker images for both the React frontend and the FastAPI backend.
+*   **GHCR Integration:** Pushes the built images securely to the GitHub Container Registry.
+*   **Automated Manifest Updates:** Automatically patches the Helm `values.yaml` file with the latest Git SHA, bridging the gap between CI and CD by triggering ArgoCD synchronization.
+
+---
+
+## Recruiter and Local Evaluation Guide
+
+You can run the entire microservices stack (Frontend, Backend, PostgreSQL, Redis) locally on your machine for free in just a few minutes using Docker Compose. This allows you to evaluate the codebase without requiring an AWS account.
 
 ### Prerequisites
-- Docker & Docker Compose installed.
-- Git.
+*   Docker and Docker Compose installed.
+*   Git installed.
 
-### 1-Minute Setup
+### Setup Instructions
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/ahmedgeeter/shiphny-ai-support.git
-   cd shiphny-ai-support
-   ```
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/ahmedgeeter/shiphny-ai-support.git
+    cd shiphny-ai-support
+    ```
 
-2. **Configure Environment:**
-   Copy the provided template to create your `.env` file:
-   ```bash
-   cp backend/.env.example backend/.env
-   ```
+2.  **Configure the Environment:**
+    Copy the provided environment template to create your local `.env` file:
+    ```bash
+    cp backend/.env.example backend/.env
+    ```
 
-3. **Launch the Stack:**
-   ```bash
-   docker-compose up --build
-   ```
+3.  **Launch the Stack:**
+    Build and start the containers using Docker Compose:
+    ```bash
+    docker-compose up --build
+    ```
 
-### What happens?
-Docker Compose will automatically:
-1. Spin up **PostgreSQL** and **Redis**.
-2. Run database migrations (`alembic upgrade head`) automatically.
-3. Start the **FastAPI Backend** on `http://localhost:8000`.
-4. Start the **React Frontend** on `http://localhost:3000`.
+### Execution Details
+Once the command is executed, Docker Compose will automatically perform the following:
+1.  Spin up isolated **PostgreSQL** and **Redis** instances.
+2.  Run the necessary database migrations (`alembic upgrade head`) before starting the backend.
+3.  Start the **FastAPI Backend** on `http://localhost:8000`.
+4.  Start the **React Frontend** on `http://localhost:3000`.
 
-*You can now explore the frontend at `http://localhost:3000` and the API docs at `http://localhost:8000/api/docs`.*
+You can explore the user interface at `http://localhost:3000` and review the interactive API documentation at `http://localhost:8000/api/docs`.
 
 ---
 
