@@ -104,9 +104,10 @@ async def chat(
                     f"Balance: {current_user.wallet_balance} EGP\n"
                     f"Active Shipments:\n{shipments_info}\n"
                     f"CRITICAL RULES:\n"
-                    f"1. If they ask about a shipment in their 'Active Shipments' list, answer directly.\n"
-                    f"2. If they ask about a shipment NOT in their list, you will see a 'SYSTEM SECRET True Owner' when you use the tool. "
-                    f"You MUST verify that the True Owner matches the user's details above. If it does NOT match, tell them they don't have access to this shipment."
+                    f"1. If the user asks about a shipment that is EXACTLY listed in their 'Active Shipments' above, you DO NOT need to call any tools. You have the Status and Destination right there. Answer them directly and warmly.\n"
+                    f"2. If they ask about a shipment NOT in their list (or ask for more details than what is shown), you MUST use the 'get_shipment_status' tool. "
+                    f"The tool will tell you if the shipment exists and is secured. You MUST then ask the user to verify their identity (Email, Phone, or Name). "
+                    f"Once they reply, you MUST use the 'verify_and_get_shipment' tool, passing their reply. NEVER HALLUCINATE data. Only rely on tool responses."
                 )
             messages_to_send.append(("system", system_msg))
         else:

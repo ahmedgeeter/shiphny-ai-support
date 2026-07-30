@@ -19,11 +19,12 @@ async def get_shipment_status(tracking_number: str) -> str:
     Returns:
         A message instructing you to verify the user's identity first.
     """
-    tracking_number = tracking_number.strip().upper()
+    import re
+    tracking_number = re.sub(r'[^A-Z0-9-]', '', tracking_number.upper())
     try:
         async with AsyncSessionLocal() as session:
             result = await session.execute(
-                select(Shipment.id).where(Shipment.tracking_number == tracking_number)
+                select(Shipment.id).where(Shipment.tracking_number.ilike(f"%{tracking_number}%"))
             )
             if not result.scalar_one_or_none():
                 return f"Could not find any shipment with tracking number: {tracking_number}. Tell the user the shipment does not exist."
@@ -50,11 +51,12 @@ async def verify_and_get_shipment(tracking_number: str, verification_value: str)
     Returns:
         The shipment details if verification succeeds, or an error if it fails.
     """
-    tracking_number = tracking_number.strip().upper()
+    import re
+    tracking_number = re.sub(r'[^A-Z0-9-]', '', tracking_number.upper())
     try:
         async with AsyncSessionLocal() as session:
             result = await session.execute(
-                select(Shipment).options(selectinload(Shipment.customer)).where(Shipment.tracking_number == tracking_number)
+                select(Shipment).options(selectinload(Shipment.customer)).where(Shipment.tracking_number.ilike(f"%{tracking_number}%"))
             )
             shipment = result.scalar_one_or_none()
             
