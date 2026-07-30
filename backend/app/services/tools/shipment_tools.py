@@ -19,11 +19,22 @@ async def get_shipment_status(tracking_number: str) -> str:
     Returns:
         A message instructing you to verify the user's identity first.
     """
-    return (
-        f"Shipment {tracking_number} is secured. DO NOT hallucinate details. "
-        f"You MUST ask the user to provide their Email, Phone Number, or Full Name. "
-        f"Once they provide it, use the 'verify_and_get_shipment' tool to get the real details."
-    )
+    tracking_number = tracking_number.strip().upper()
+    try:
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(
+                select(Shipment.id).where(Shipment.tracking_number == tracking_number)
+            )
+            if not result.scalar_one_or_none():
+                return f"Could not find any shipment with tracking number: {tracking_number}. Tell the user the shipment does not exist."
+                
+            return (
+                f"Shipment {tracking_number} exists and is secured. DO NOT hallucinate details. "
+                f"You MUST ask the user to provide their Email, Phone Number, or Full Name. "
+                f"Once they provide it, use the 'verify_and_get_shipment' tool to get the real details."
+            )
+    except Exception as e:
+        return f"An error occurred: {str(e)}"
 
 @tool
 async def verify_and_get_shipment(tracking_number: str, verification_value: str) -> str:
@@ -39,6 +50,7 @@ async def verify_and_get_shipment(tracking_number: str, verification_value: str)
     Returns:
         The shipment details if verification succeeds, or an error if it fails.
     """
+    tracking_number = tracking_number.strip().upper()
     try:
         async with AsyncSessionLocal() as session:
             result = await session.execute(
