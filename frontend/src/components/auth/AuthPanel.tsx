@@ -28,10 +28,14 @@ export function AuthPanel({ isOpen, onClose, t, lang, onToast, onLoginSuccess }:
     
     try {
       if (isLogin) {
+        const formData = new URLSearchParams()
+        formData.append('username', email)
+        formData.append('password', password)
+
         const res = await fetch(`${API_BASE}/api/auth/login`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: email, password: password })
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData
         })
         
         if (res.ok) {
