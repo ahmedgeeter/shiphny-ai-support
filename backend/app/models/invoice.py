@@ -23,7 +23,7 @@ class Invoice(Base):
     __tablename__ = "invoices"
     
     id = Column(Integer, primary_key=True, index=True)
-    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False, index=True)
     
     amount = Column(Float, nullable=False)
     status = Column(Enum(InvoiceStatus), default=InvoiceStatus.UNPAID, nullable=False)

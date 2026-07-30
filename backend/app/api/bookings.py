@@ -16,6 +16,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
 from app.models.booking import Booking, BookingStatus, _mask_phone
+from app.api.deps import get_current_user
+from app.models.customer import Customer
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 
@@ -44,7 +46,6 @@ def _check_rate(ip: str) -> None:
 # ── Request / Response ────────────────────────────────────────────────────────
 
 class BookingRequest(BaseModel):
-    customer_id:      int = Field(1, description="Customer placing the booking")
     sender_name:      str = Field(..., min_length=2, max_length=100)
     sender_phone:     str = Field(..., min_length=8, max_length=20)
     sender_email:     Optional[str] = Field(None, max_length=120, description="Email for identity verification")
@@ -128,8 +129,9 @@ async def create_booking(
     data: BookingRequest,
     request: Request,
     db: AsyncSession = Depends(get_db),
+    current_user: Customer = Depends(get_current_user),
 ) -> BookingResponse:
-    """Create a new shipment booking (scoped to customer_id)."""
+    """Create a new shipment booking (scoped to current_user)."""
     _check_rate(request.client.host)
 
     for _ in range(10):
@@ -140,7 +142,7 @@ async def create_booking(
 
     booking = Booking(
         reference        = ref,
-        customer_id      = data.customer_id,
+        customer_id      = current_user.id,
         sender_name      = data.sender_name,
         sender_phone     = data.sender_phone,
         sender_email     = data.sender_email.strip().lower() if data.sender_email else None,
@@ -232,17 +234,17 @@ async def verify_identity(
         )
 
 
-@router.get("/my/{customer_id}", response_model=list[BookingResponse])
+@router.get("/my", response_model=list[BookingResponse])
 async def list_my_bookings(
-    customer_id: int,
     request: Request,
     db: AsyncSession = Depends(get_db),
+    current_user: Customer = Depends(get_current_user),
 ) -> list[BookingResponse]:
-    """List bookings belonging to a specific customer only."""
+    """List bookings belonging to the authenticated customer."""
     _check_rate(request.client.host)
     result = await db.execute(
         select(Booking)
-        .where(Booking.customer_id == customer_id)
+        .where(Booking.customer_id == current_user.id)
         .order_by(desc(Booking.created_at))
         .limit(20)
     )
@@ -252,13 +254,13 @@ async def list_my_bookings(
 @router.get("/{reference}", response_model=BookingResponse)
 async def get_booking(
     reference: str,
-    customer_id: int = 1,
     request: Request = None,
     db: AsyncSession = Depends(get_db),
+    current_user: Customer = Depends(get_current_user),
 ) -> BookingResponse:
     """
     Get a booking by reference.
-    Returns 404 if the booking does not belong to customer_id (prevents enumeration).
+    Returns 404 if the booking does not belong to current_user (prevents enumeration).
     """
     if request:
         _check_rate(request.client.host)
@@ -267,7 +269,7 @@ async def get_booking(
     )
     booking = result.scalar_one_or_none()
     # Return 404 even if booking exists but belongs to someone else
-    if not booking or (booking.customer_id is not None and booking.customer_id != customer_id):
+    if not booking or (booking.customer_id is not None and booking.customer_id != current_user.id):
         raise HTTPException(status_code=404, detail="Booking not found")
 
     return _to_response(booking, mask=False)

@@ -25,7 +25,7 @@ class Shipment(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     tracking_number = Column(String(50), unique=True, nullable=False, index=True)
-    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False, index=True)
     
     status = Column(Enum(ShipmentStatus), default=ShipmentStatus.PENDING, nullable=False)
     destination = Column(String(200), nullable=False)

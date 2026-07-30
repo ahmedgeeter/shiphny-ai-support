@@ -47,12 +47,8 @@ async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)) -> A
     await db.refresh(user)
     return user
 
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
 @router.post("/login")
-async def login(form_data: LoginRequest, db: AsyncSession = Depends(get_db)) -> Any:
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)) -> Any:
     result = await db.execute(select(Customer).where(Customer.email == form_data.username))
     user = result.scalars().first()
     if not user or not verify_password(form_data.password, user.hashed_password):
