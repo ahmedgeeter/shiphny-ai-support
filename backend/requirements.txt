@@ -25,9 +25,7 @@ langchain-openai
 langchain-google-genai
 
 # Agents and Gateways
-deerflow
 litellm
-aegra-api
 
 # Utilities
 aiofiles==23.2.1
