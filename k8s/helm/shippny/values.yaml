@@ -14,6 +14,11 @@ backend:
     limits:
       cpu: 1000m
       memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
 
 worker:
   replicaCount: 2
@@ -24,6 +29,11 @@ worker:
     limits:
       cpu: 1000m
       memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
 
 frontend:
   replicaCount: 2
