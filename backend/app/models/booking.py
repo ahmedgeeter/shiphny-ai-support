@@ -7,6 +7,7 @@ import enum
 from datetime import datetime
 
 from sqlalchemy import Column, Integer, String, Text, DateTime, Enum, Float, ForeignKey
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 
@@ -49,6 +50,9 @@ class Booking(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    customer = relationship("Customer", back_populates="bookings")
 
     def __repr__(self) -> str:
         return f"<Booking(ref={self.reference}, sender={self.sender_name}, status={self.status.value})>"
