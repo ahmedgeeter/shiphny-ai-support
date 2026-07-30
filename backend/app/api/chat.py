@@ -106,17 +106,18 @@ async def chat(
                     f"CRITICAL RULES:\n"
                     f"1. If the user asks about a shipment that is EXACTLY listed in their 'Active Shipments' above, you DO NOT need to call any tools. You have the Status and Destination right there. Answer them directly and warmly.\n"
                     f"2. If they ask about a shipment NOT in their list (or ask for more details than what is shown), you MUST use the 'get_shipment_status' tool. "
-                    f"The tool will tell you if the shipment exists and is secured. You MUST then ask the user to verify their identity (Email, Phone, or Name). "
-                    f"Once they reply, you MUST use the 'verify_and_get_shipment' tool, passing their reply. NEVER HALLUCINATE data. Only rely on tool responses."
+                    f"IF the tool says the shipment exists, you MUST then ask the user to verify their identity (Email, Phone, or Name). "
+                    f"IF the tool says the shipment does not exist, tell the user politely and STOP. Do NOT ask for verification.\n"
+                    f"3. Once the user replies with verification data, you MUST use the 'verify_and_get_shipment' tool, passing their reply. NEVER HALLUCINATE data. Only rely on tool responses."
                 )
             messages_to_send.append(("system", system_msg))
         else:
             system_msg = (
                 f"SYSTEM INTERNAL CONTEXT: You are talking to an anonymous guest user.\n"
                 f"CRITICAL RULE: If the user asks about a shipment or booking, you MUST use the 'get_shipment_status' tool. "
-                f"The tool will tell you that the shipment is secured and ask you to get the user's Name, Phone, or Email. "
-                f"You MUST ask the user for this information. Once they reply, you MUST use the 'verify_and_get_shipment' tool, "
-                f"passing the tracking number and their reply. "
+                f"IF the tool says the shipment exists, you MUST ask the user to provide their Name, Phone, or Email for verification. "
+                f"IF the tool says the shipment does not exist, tell the user politely and STOP. Do NOT ask for verification.\n"
+                f"Once they provide verification data, you MUST use the 'verify_and_get_shipment' tool, passing their reply. "
                 f"NEVER HALLUCINATE data. Only rely on the tool responses. If verification fails, tell the user politely."
             )
             messages_to_send.append(("system", system_msg))
