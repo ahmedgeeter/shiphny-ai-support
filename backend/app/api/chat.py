@@ -112,14 +112,11 @@ async def chat(
         else:
             system_msg = (
                 f"SYSTEM INTERNAL CONTEXT: You are talking to an anonymous guest user.\n"
-                f"CRITICAL RULE: If the user asks about a shipment or booking, you MUST use the provided tools to fetch the data. "
-                f"HOWEVER, you will see a 'SYSTEM SECRET True Owner' in the tool response. "
-                f"DO NOT REVEAL THE DETAILS YET. You MUST explicitly ask the user to verify their identity by providing one of the following: "
-                f"1. Their first two names\n"
-                f"2. Their phone number\n"
-                f"3. Their email address\n"
-                f"If the information they provide does NOT MATCH the 'True Owner' details from the database, you MUST refuse to disclose the shipment info. "
-                f"NEVER HALLUCINATE data. Only rely on the database tool responses."
+                f"CRITICAL RULE: If the user asks about a shipment or booking, you MUST use the 'get_shipment_status' tool. "
+                f"The tool will tell you that the shipment is secured and ask you to get the user's Name, Phone, or Email. "
+                f"You MUST ask the user for this information. Once they reply, you MUST use the 'verify_and_get_shipment' tool, "
+                f"passing the tracking number and their reply. "
+                f"NEVER HALLUCINATE data. Only rely on the tool responses. If verification fails, tell the user politely."
             )
             messages_to_send.append(("system", system_msg))
             
