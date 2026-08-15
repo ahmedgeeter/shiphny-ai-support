@@ -15,7 +15,7 @@ asyncpg==0.29.0
 psycopg2-binary==2.9.9
 
 # AI
-httpx==0.27.0
+httpx==0.25.2
 langchain==0.1.11
 langchain-core==0.1.29
 langgraph==0.0.26
