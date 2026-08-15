@@ -1,0 +1,207 @@
+Folder PATH listing
+Volume serial number is 0000005E 5C60:E8D2
+C:.
+|   .env.example
+|   .gitignore
+|   codebase_tree.txt
+|   docker-compose.yml
+|   README.md
+|   render.yaml
+|   
++---.github
+|   \---workflows
+|           ci-cd.yaml
+|           
++---backend
+|   |   .env
+|   |   .env.example
+|   |   alembic.ini
+|   |   Dockerfile
+|   |   main.py
+|   |   requirements.txt
+|   |   seed_knowledge_base.py
+|   |   shippny.db
+|   |   test_db.py
+|   |   
+|   +---app
+|   |   |   __init__.py
+|   |   |   
+|   |   +---agents
+|   |   +---api
+|   |   |       admin_router.py
+|   |   |       analytics.py
+|   |   |       auth_router.py
+|   |   |       bookings.py
+|   |   |       chat.py
+|   |   |       chat_debug.py
+|   |   |       customers.py
+|   |   |       deps.py
+|   |   |       __init__.py
+|   |   |       
+|   |   +---core
+|   |   |   |   config.py
+|   |   |   |   security.py
+|   |   |   |   
+|   |   |   \---__pycache__
+|   |   |           config.cpython-310.pyc
+|   |   |           
+|   |   +---db
+|   |   |   |   database.py
+|   |   |   |   
+|   |   |   +---migrations
+|   |   |   |   |   env.py
+|   |   |   |   |   README
+|   |   |   |   |   script.py.mako
+|   |   |   |   |   
+|   |   |   |   \---versions
+|   |   |   |           37e7bcc52265_add_full_name.py
+|   |   |   |           5d4e5f6g7h8i_add_indexes_to_customer_id.py
+|   |   |   |           ac395007ea55_init_tables.py
+|   |   |   |           
+|   |   |   \---__pycache__
+|   |   |           database.cpython-310.pyc
+|   |   |           
+|   |   +---models
+|   |   |   |   booking.py
+|   |   |   |   conversation.py
+|   |   |   |   customer.py
+|   |   |   |   invoice.py
+|   |   |   |   knowledge_base.py
+|   |   |   |   shipment.py
+|   |   |   |   __init__.py
+|   |   |   |   
+|   |   |   \---__pycache__
+|   |   |           booking.cpython-310.pyc
+|   |   |           conversation.cpython-310.pyc
+|   |   |           customer.cpython-310.pyc
+|   |   |           invoice.cpython-310.pyc
+|   |   |           knowledge_base.cpython-310.pyc
+|   |   |           shipment.cpython-310.pyc
+|   |   |           __init__.cpython-310.pyc
+|   |   |           
+|   |   +---services
+|   |   |   |   agent.py
+|   |   |   |   fallback_responses.py
+|   |   |   |   gemini_ai.py
+|   |   |   |   groq_ai.py
+|   |   |   |   router.py
+|   |   |   |   __init__.py
+|   |   |   |   
+|   |   |   \---tools
+|   |   |       |   billing_tools.py
+|   |   |       |   customer_tools.py
+|   |   |       |   shipment_tools.py
+|   |   |       |   __init__.py
+|   |   |       |   
+|   |   |       \---__pycache__
+|   |   |               shipment_tools.cpython-310.pyc
+|   |   |               
+|   |   \---__pycache__
+|   |           __init__.cpython-310.pyc
+|   |           
+|   +---scripts
+|   |       seed_data.py
+|   |       
+|   \---seed
+|           conversations.py
+|           customers.py
+|           knowledge_base.py
+|           seed_database.py
+|           seed_enterprise_data.py
+|           
++---frontend
+|   |   .dockerignore
+|   |   .env.development
+|   |   .env.production
+|   |   .gitignore
+|   |   Dockerfile
+|   |   index.html
+|   |   netlify.toml
+|   |   nginx.conf
+|   |   package-lock.json
+|   |   package.json
+|   |   postcss.config.js
+|   |   tailwind.config.js
+|   |   tsconfig.json
+|   |   tsconfig.node.json
+|   |   vite.config.ts
+|   |   
+|   +---public
+|   |       delivery_hero.png
+|   |       favicon.svg
+|   |       
+|   \---src
+|       |   api.ts
+|       |   App.tsx
+|       |   index.css
+|       |   main.tsx
+|       |   translations.ts
+|       |   vite-env.d.ts
+|       |   
+|       +---components
+|       |   |   ChatWidget.tsx
+|       |   |   Dashboard.tsx
+|       |   |   Layout.tsx
+|       |   |   PersistentChat.tsx
+|       |   |   theme.ts
+|       |   |   
+|       |   +---auth
+|       |   |       AuthPanel.tsx
+|       |   |       
+|       |   +---common
+|       |   |       BookingModal.tsx
+|       |   |       ShiphnyLogo.tsx
+|       |   |       Toast.tsx
+|       |   |       
+|       |   \---layout
+|       |           Footer.tsx
+|       |           Navbar.tsx
+|       |           
+|       +---pages
+|       |       AboutPage.tsx
+|       |       AdminDashboard.tsx
+|       |       ContactPage.tsx
+|       |       DashboardPage.tsx
+|       |       HomePage.tsx
+|       |       ServicesPage.tsx
+|       |       SupportPage.tsx
+|       |       TrackingPage.tsx
+|       |       
+|       +---services
+|       \---utils
+|               constants.ts
+|               validators.ts
+|               
++---infrastructure
+|   |   .terraform.lock.hcl
+|   |   main.tf
+|   |   outputs.tf
+|   |   variables.tf
+|   |   
+|   +---api-gateway
+|   |       kong.yaml
+|   |       
+|   \---litellm
+|           config.yaml
+|           
++---k8s
+|   +---argocd
+|   |       application.yaml
+|   |       
+|   \---helm
+|       \---shippny
+|           |   Chart.yaml
+|           |   values.yaml
+|           |   
+|           \---templates
+|                   backend.yaml
+|                   database.yaml
+|                   frontend.yaml
+|                   hpa.yaml
+|                   ingress.yaml
+|                   secrets.yaml
+|                   worker.yaml
+|                   
+\---scratch
+        test_dashboard.py
+        

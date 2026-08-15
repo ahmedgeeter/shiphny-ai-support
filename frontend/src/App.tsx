@@ -101,8 +101,13 @@ export default function App() {
         {currentPage === 'about'    && <AboutPage    t={t} lang={lang} />}
         {currentPage === 'contact'  && <ContactPage  t={t} lang={lang} onToast={setToast} />}
         {currentPage === 'support'  && <SupportPage  t={t} apiStatus={apiStatus} />}
-        {currentPage === 'dashboard' && <DashboardPage t={t} lang={lang} />}
-        {currentPage === 'admin' && <AdminDashboard t={t} lang={lang} />}
+        {/* Customer dashboard: only accessible when authenticated */}
+        {currentPage === 'dashboard' && isAuthenticated && <DashboardPage t={t} lang={lang} />}
+        {currentPage === 'dashboard' && !isAuthenticated && (() => { setIsAuthOpen(true); setCurrentPage('home'); return null; })()}
+        {/* Admin dashboard: only accessible when authenticated as admin */}
+        {currentPage === 'admin' && isAdmin && <AdminDashboard t={t} lang={lang} />}
+        {currentPage === 'admin' && !isAdmin && (() => { setCurrentPage('home'); return null; })()}
+
       </main>
 
       <AuthPanel 

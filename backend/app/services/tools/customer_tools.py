@@ -16,7 +16,7 @@ async def search_customer(query: str) -> str:
     Use this tool when an Admin asks for information about a specific customer.
     """
     try:
-        async with AsyncSessionLocal() as session:
+        async with AsyncSessionLocal()() as session:
             # Search by name (partial match), exact email, or exact phone
             stmt = select(Customer).options(
                 selectinload(Customer.shipments)

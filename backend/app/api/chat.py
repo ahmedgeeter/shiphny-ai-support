@@ -104,17 +104,23 @@ async def chat(
                     f"Balance: {current_user.wallet_balance} EGP\n"
                     f"Active Shipments:\n{shipments_info}\n"
                     f"CRITICAL RULES:\n"
-                    f"1. If they ask about a shipment in their 'Active Shipments' list, answer directly.\n"
-                    f"2. If they ask about a shipment NOT in their list, you will see a 'SYSTEM SECRET True Owner' when you use the tool. "
-                    f"You MUST verify that the True Owner matches the user's details above. If it does NOT match, tell them they don't have access to this shipment."
+                    f"1. If the user asks about a shipment that is EXACTLY listed in their 'Active Shipments' above, you DO NOT need to call any tools. You have the Status and Destination right there. Answer them directly and warmly.\n"
+                    f"2. If they ask about a shipment NOT in their list (or ask for more details than what is shown), you MUST use the 'get_shipment_status' tool. "
+                    f"IF the tool says the shipment exists, you MUST then ask the user to verify their identity (Email, Phone, or Name). "
+                    f"IF the tool says the shipment does not exist, tell the user politely and STOP. Do NOT ask for verification.\n"
+                    f"3. Once the user replies with verification data, you MUST use the 'verify_and_get_shipment' tool, passing their reply. NEVER HALLUCINATE data. Only rely on tool responses.\n"
+                    f"4. If the user asks general questions (e.g. shipping rates, return policy, allowed items, contact info), use the 'search_knowledge_base' tool. Do NOT guess."
                 )
             messages_to_send.append(("system", system_msg))
         else:
             system_msg = (
                 f"SYSTEM INTERNAL CONTEXT: You are talking to an anonymous guest user.\n"
-                f"CRITICAL RULE: If they ask about a shipment, you will see a 'SYSTEM SECRET True Owner' when you use the tool. "
-                f"You MUST ask the user to verify their identity (name, email, or phone) BEFORE revealing the shipment details. "
-                f"If the details they provide do NOT match the True Owner, refuse to give the shipment info."
+                f"CRITICAL RULE: If the user asks about a shipment or booking, you MUST use the 'get_shipment_status' tool. "
+                f"IF the tool says the shipment exists, you MUST ask the user to provide their Name, Phone, or Email for verification. "
+                f"IF the tool says the shipment does not exist, tell the user politely and STOP. Do NOT ask for verification.\n"
+                f"Once they provide verification data, you MUST use the 'verify_and_get_shipment' tool, passing their reply. "
+                f"NEVER HALLUCINATE data. Only rely on the tool responses. If verification fails, tell the user politely.\n"
+                f"If the user asks general questions (prices, policies, support), use the 'search_knowledge_base' tool."
             )
             messages_to_send.append(("system", system_msg))
             

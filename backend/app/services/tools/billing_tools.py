@@ -22,7 +22,7 @@ async def get_billing_info(email: str) -> str:
         was not found.
     """
     try:
-        async with AsyncSessionLocal() as session:
+        async with AsyncSessionLocal()() as session:
             # Query the customer and eagerly load their invoices
             result = await session.execute(
                 select(Customer)

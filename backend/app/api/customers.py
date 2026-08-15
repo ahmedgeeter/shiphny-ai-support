@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
 from app.models.customer import Customer, CustomerTier
+from app.api.deps import get_current_active_admin
 
 
 router = APIRouter(prefix="/api/customers", tags=["customers"])
@@ -36,7 +37,8 @@ async def list_customers(
     search: Optional[str] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Customer = Depends(get_current_active_admin)
 ) -> list[CustomerResponse]:
     """List customers with filters."""
     
@@ -74,7 +76,8 @@ async def list_customers(
 @router.get("/{customer_id}")
 async def get_customer(
     customer_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Customer = Depends(get_current_active_admin)
 ) -> CustomerResponse:
     """Get customer details."""
     

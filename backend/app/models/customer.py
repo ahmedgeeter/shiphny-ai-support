@@ -50,6 +50,7 @@ class Customer(Base):
     # Relationships
     conversations = relationship("Conversation", back_populates="customer", lazy="selectin")
     shipments = relationship("Shipment", back_populates="customer", lazy="selectin", cascade="all, delete-orphan")
+    bookings = relationship("Booking", back_populates="customer", lazy="selectin", cascade="all, delete-orphan")
     invoices = relationship("Invoice", back_populates="customer", lazy="selectin", cascade="all, delete-orphan")
     
     def __repr__(self) -> str:

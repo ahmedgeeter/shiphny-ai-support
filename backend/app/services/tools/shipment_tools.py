@@ -3,7 +3,16 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from app.db.database import AsyncSessionLocal
 from app.models.shipment import Shipment, ShipmentStatus
+from app.models.booking import Booking, BookingStatus
 from app.models.customer import Customer
+
+def normalize_arabic(text: str) -> str:
+    if not text: return ""
+    import re
+    text = re.sub("[إأآا]", "ا", text)
+    text = re.sub("ة", "ه", text)
+    text = re.sub("ى", "ي", text)
+    return text.strip().lower()
 
 @tool
 async def get_shipment_status(tracking_number: str) -> str:
@@ -17,33 +26,128 @@ async def get_shipment_status(tracking_number: str) -> str:
         tracking_number: The unique tracking number of the shipment.
         
     Returns:
-        A formatted string describing the shipment's status, destination, and estimated delivery date, 
-        or a message indicating that the shipment was not found.
+        A message instructing you to verify the user's identity first.
     """
+    import re
+    tracking_number = re.sub(r'[^A-Z0-9-]', '', tracking_number.upper())
     try:
-        async with AsyncSessionLocal() as session:
+        async with AsyncSessionLocal()() as session:
+            # Check Shipment (SHP-...)
             result = await session.execute(
-                select(Shipment).options(selectinload(Shipment.customer)).where(Shipment.tracking_number == tracking_number)
+                select(Shipment.id).where(Shipment.tracking_number.ilike(f"%{tracking_number}%"))
+            )
+            found = result.scalar_one_or_none()
+            
+            # Check Booking (SH-...) if not found
+            if not found:
+                b_result = await session.execute(
+                    select(Booking.id).where(Booking.reference.ilike(f"%{tracking_number}%"))
+                )
+                found = b_result.scalar_one_or_none()
+
+            if not found:
+                return f"Could not find any shipment with tracking number: {tracking_number}. Tell the user the shipment does not exist."
+                
+            return (
+                f"Shipment {tracking_number} exists and is secured. DO NOT hallucinate details. "
+                f"You MUST ask the user to provide their Email, Phone Number, or Full Name. "
+                f"Once they provide it, use the 'verify_and_get_shipment' tool to get the real details."
+            )
+    except Exception as e:
+        return f"An error occurred: {str(e)}"
+
+@tool
+async def verify_and_get_shipment(tracking_number: str, verification_value: str) -> str:
+    """
+    Verify the user's identity and retrieve their shipment details.
+    
+    Use this tool AFTER asking the user for their email, name, or phone number.
+    
+    Args:
+        tracking_number: The exact tracking number (e.g., 'SHP-12345').
+        verification_value: The email, name, or phone number the user provided.
+        
+    Returns:
+        The shipment details if verification succeeds, or an error if it fails.
+    """
+    import re
+    tracking_number = re.sub(r'[^A-Z0-9-]', '', tracking_number.upper())
+    try:
+        async with AsyncSessionLocal()() as session:
+            # Try Shipment first
+            result = await session.execute(
+                select(Shipment).options(selectinload(Shipment.customer)).where(Shipment.tracking_number.ilike(f"%{tracking_number}%"))
             )
             shipment = result.scalar_one_or_none()
             
-            if not shipment:
-                return f"Could not find any shipment with tracking number: {tracking_number}. Please ask the user to verify the tracking number."
+            customer_email = None
+            customer_phone = None
+            customer_name = None
+            est_delivery = "Unknown"
+            status_val = "Unknown"
+            destination = "Unknown"
             
-            est_delivery = shipment.estimated_delivery.strftime("%Y-%m-%d") if shipment.estimated_delivery else "Unknown"
+            if shipment:
+                if not shipment.customer:
+                    return "Shipment has no owner. Cannot verify."
+                customer_email = shipment.customer.email
+                customer_phone = shipment.customer.phone
+                customer_name = shipment.customer.full_name
+                est_delivery = shipment.estimated_delivery.strftime("%Y-%m-%d") if shipment.estimated_delivery else "Unknown"
+                status_val = shipment.status.value
+                destination = shipment.destination
+            else:
+                # Try Booking
+                b_result = await session.execute(
+                    select(Booking).where(Booking.reference.ilike(f"%{tracking_number}%"))
+                )
+                booking = b_result.scalar_one_or_none()
+                if not booking:
+                    return f"Could not find any shipment with tracking number: {tracking_number}."
+                    
+                customer_email = booking.sender_email
+                customer_phone = booking.sender_phone
+                customer_name = booking.sender_name
+                est_delivery = "Unknown (Booking in progress)"
+                status_val = booking.status.value
+                destination = booking.delivery_address
+
+            val = normalize_arabic(verification_value)
+            
+            phone_match = False
+            if customer_phone:
+                digits_db = "".join(c for c in customer_phone if c.isdigit())
+                digits_val = "".join(c for c in val if c.isdigit())
+                if digits_val and len(digits_val) >= 4 and digits_val in digits_db:
+                    phone_match = True
+                    
+            email_match = False
+            if customer_email and normalize_arabic(customer_email) == val:
+                email_match = True
+                
+            name_match = False
+            if customer_name:
+                db_words = normalize_arabic(customer_name).split()
+                val_words = val.split()
+                if len(val_words) >= 2 and len(db_words) >= 2:
+                    if db_words[:2] == val_words[:2]:
+                        name_match = True
+                elif len(val_words) == 1 and len(db_words) >= 1:
+                    if db_words[0] == val_words[0]:
+                        name_match = True
+            
+            if not (phone_match or email_match or name_match):
+                return "Verification failed. The provided information does not match the owner of this shipment."
             
             return (
+                f"Verification Successful!\n"
                 f"Shipment {tracking_number} Details:\n"
-                f"- Status: {shipment.status.value}\n"
-                f"- Destination: {shipment.destination}\n"
-                f"- Estimated Delivery: {est_delivery}\n"
-                f"--- SYSTEM SECRET (DO NOT REVEAL TO USER DIRECTLY) ---\n"
-                f"- True Owner Name: {shipment.customer.full_name if shipment.customer else 'Unknown'}\n"
-                f"- True Owner Email: {shipment.customer.email if shipment.customer else 'Unknown'}\n"
-                f"- True Owner Phone: {shipment.customer.phone if shipment.customer else 'Unknown'}"
+                f"- Status: {status_val}\n"
+                f"- Destination: {destination}\n"
+                f"- Estimated Delivery: {est_delivery}"
             )
     except Exception as e:
-        return f"An error occurred while retrieving the shipment status: {str(e)}. Please inform the user that we are experiencing technical difficulties."
+        return f"An error occurred while verifying the shipment: {str(e)}."
 
 @tool
 async def cancel_shipment(tracking_number: str) -> str:
@@ -62,7 +166,7 @@ async def cancel_shipment(tracking_number: str) -> str:
         or an error message if the shipment was not found.
     """
     try:
-        async with AsyncSessionLocal() as session:
+        async with AsyncSessionLocal()() as session:
             result = await session.execute(
                 select(Shipment).where(Shipment.tracking_number == tracking_number)
             )
