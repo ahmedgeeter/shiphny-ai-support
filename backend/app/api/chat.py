@@ -1,7 +1,9 @@
 """
 Chat API Endpoints - Enterprise Autonomous Agent
+Handles real-time communication between customers and the AI support engine.
 """
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from typing import Optional
@@ -13,6 +15,10 @@ from app.models.shipment import Shipment
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.db.database import get_db
+from app.services.prompts import build_system_prompt
+
+# Configure module logger for observability
+logger = logging.getLogger(__name__)
 
 # Graceful fallback if AI libraries aren't installed yet
 try:
@@ -48,13 +54,14 @@ async def chat(
     db: AsyncSession = Depends(get_db)
 ) -> ChatResponse:
     """
-    Send a message to the Autonomous LangGraph Agent.
-    Falls back to static response if AI libraries are not available.
+    Process an incoming chat message using the LangGraph AI agent.
+    If AI services are unavailable, falls back to static responses.
     """
     session_id = request.session_id if request.session_id else str(uuid4())
 
     if not _agent_available or compiled_graph is None:
         # Graceful fallback when AI libs aren't installed
+        logger.warning("AI services unavailable. Using fallback response.")
         from app.services.fallback_responses import get_fallback_response
         response_text = get_fallback_response(request.message)
         return ChatResponse(session_id=session_id, response=response_text)
@@ -64,7 +71,7 @@ async def chat(
         if _langfuse_available and LangfuseHandler:
             langfuse_handler = LangfuseHandler(
                 session_id=session_id,
-                user_id="anonymous",
+                user_id=current_user.email if current_user else "anonymous",
                 tags=["langgraph-agent"]
             )
             callbacks = [langfuse_handler]
@@ -74,58 +81,18 @@ async def chat(
             "callbacks": callbacks
         }
 
-        # Inject system context if user is logged in
+        # Build dynamic context based on user auth state and active shipments
         messages_to_send = []
+        shipments = []
         if current_user:
-            # Fetch user shipments
             result = await db.execute(select(Shipment).where(Shipment.customer_id == current_user.id))
             shipments = result.scalars().all()
             
-            shipments_info = "None"
-            if shipments:
-                shipments_info = "\n".join([f"- Tracking: {s.tracking_number}, Status: {s.status.value}, Destination: {s.destination}" for s in shipments])
-            
-            if current_user.role.value == 'admin':
-                system_msg = (
-                    f"SYSTEM INTERNAL CONTEXT: You are talking to a SYSTEM ADMIN.\n"
-                    f"Name: {current_user.full_name}\n"
-                    f"Email: {current_user.email}\n"
-                    f"CRITICAL RULE: Since this user is an admin, they have FULL CLEARANCE. Do NOT ask them to verify their identity. "
-                    f"If they ask about any shipment, provide the details immediately. "
-                    f"If they ask for information about a specific customer, use the search_customer tool to find their profile and shipments. "
-                    f"IMPORTANT: You MUST process tool calls in English. If the user speaks Arabic, translate the intent to English for the tool call, and then reply to the user in Arabic."
-                )
-            else:
-                system_msg = (
-                    f"SYSTEM INTERNAL CONTEXT: You are talking to a logged-in customer.\n"
-                    f"Name: {current_user.full_name}\n"
-                    f"Email: {current_user.email}\n"
-                    f"Phone: {current_user.phone}\n"
-                    f"Balance: {current_user.wallet_balance} EGP\n"
-                    f"Active Shipments:\n{shipments_info}\n"
-                    f"CRITICAL RULES:\n"
-                    f"1. If the user asks about a shipment that is EXACTLY listed in their 'Active Shipments' above, you DO NOT need to call any tools. You have the Status and Destination right there. Answer them directly and warmly.\n"
-                    f"2. If they ask about a shipment NOT in their list (or ask for more details than what is shown), you MUST use the 'get_shipment_status' tool. "
-                    f"IF the tool says the shipment exists, you MUST then ask the user to verify their identity (Email, Phone, or Name). "
-                    f"IF the tool says the shipment does not exist, tell the user politely and STOP. Do NOT ask for verification.\n"
-                    f"3. Once the user replies with verification data, you MUST use the 'verify_and_get_shipment' tool, passing their reply. NEVER HALLUCINATE data. Only rely on tool responses.\n"
-                    f"4. If the user asks general questions (e.g. shipping rates, return policy, allowed items, contact info), use the 'search_knowledge_base' tool. Do NOT guess."
-                )
-            messages_to_send.append(("system", system_msg))
-        else:
-            system_msg = (
-                f"SYSTEM INTERNAL CONTEXT: You are talking to an anonymous guest user.\n"
-                f"CRITICAL RULE: If the user asks about a shipment or booking, you MUST use the 'get_shipment_status' tool. "
-                f"IF the tool says the shipment exists, you MUST ask the user to provide their Name, Phone, or Email for verification. "
-                f"IF the tool says the shipment does not exist, tell the user politely and STOP. Do NOT ask for verification.\n"
-                f"Once they provide verification data, you MUST use the 'verify_and_get_shipment' tool, passing their reply. "
-                f"NEVER HALLUCINATE data. Only rely on the tool responses. If verification fails, tell the user politely.\n"
-                f"If the user asks general questions (prices, policies, support), use the 'search_knowledge_base' tool."
-            )
-            messages_to_send.append(("system", system_msg))
-            
+        system_msg = build_system_prompt(current_user, shipments)
+        messages_to_send.append(("system", system_msg))
         messages_to_send.append(("user", request.message))
 
+        # Invoke the LangGraph agent
         result = await compiled_graph.ainvoke(
             {"messages": messages_to_send},
             config=config
@@ -139,8 +106,9 @@ async def chat(
         )
 
     except Exception as e:
+        # CRITICAL: Always log full stack traces for production debugging
+        logger.error(f"Chat endpoint failed for session {session_id}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=f"An error occurred while processing the request: {str(e)}"
+            detail="An internal error occurred while processing the chat request."
         )
-

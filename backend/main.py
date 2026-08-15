@@ -1,13 +1,16 @@
 """
-SupportBot Pro - Main Application Entry Point
-FastAPI backend for AI customer support system
+Main Application Entry Point - Shiphny AI Support
+
+This file bootstraps the FastAPI application, configures CORS, and registers all API routes.
+We keep this file minimal. All business logic is delegated to the `app.api` and `app.services` layers.
 """
 
-# Load .env before any imports that use settings
 from dotenv import load_dotenv
+# Load environment variables before any settings are initialized
 load_dotenv(override=True)
 
 import uvicorn
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,7 +19,8 @@ from app.db.database import init_db, close_db
 from app.api import chat_router, analytics_router, customers_router, bookings_router
 from app.api.chat_debug import router as debug_router
 
-# Import all models so SQLAlchemy registers them with Base.metadata before create_all
+# We import all models here to ensure SQLAlchemy's Base.metadata registers them 
+# before calling create_all() during database initialization.
 import app.models.customer       # noqa: F401
 import app.models.conversation   # noqa: F401
 import app.models.knowledge_base # noqa: F401
@@ -24,16 +28,17 @@ import app.models.booking        # noqa: F401
 import app.models.shipment       # noqa: F401
 import app.models.invoice        # noqa: F401
 
-# Create FastAPI app
+logger = logging.getLogger(__name__)
+
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
-    description="AI-powered customer support system with real-time chat",
+    description="Shiphny Enterprise API - Handles logistics operations and AI support.",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
 )
 
-# CORS middleware
+# Configure CORS for the React frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -42,54 +47,45 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.on_event("startup")
 async def startup_event():
-    """Initialize database on startup."""
-    await init_db()
-
-    import sys
-    sys.stdout.buffer.write(f"[OK] {settings.app_name} v{settings.app_version} started\n".encode('utf-8'))
-    sys.stdout.flush()
-
+    """Execute startup routines like database connection pools."""
+    try:
+        await init_db()
+        logger.info(f"Successfully started {settings.app_name} v{settings.app_version}")
+    except Exception as e:
+        logger.critical("Failed to initialize database during startup", exc_info=True)
+        raise e
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Cleanup on shutdown."""
+    """Clean up resources before the server shuts down."""
     await close_db()
-    print(f"[BYE] {settings.app_name} shutting down")
-
+    logger.info("Application shutdown complete.")
 
 @app.get("/api/health")
 async def health_check():
-    """Health check endpoint."""
+    """
+    Standard health check endpoint used by Kubernetes readiness/liveness probes.
+    """
     return {
         "status": "healthy",
         "app": settings.app_name,
         "version": settings.app_version,
-        "debug": settings.debug,
     }
-
-
-@app.get("/api/ping")
-async def ping():
-    """Ultra-lightweight keep-alive endpoint — no DB, instant response."""
-    return {"ok": True}
-
 
 @app.get("/api/config")
 async def get_config():
-    """Public configuration for frontend."""
+    """Provide safe, public configuration details to the frontend client."""
     return {
         "app_name": settings.app_name,
         "version": settings.app_version,
-        "groq_model": settings.groq_model,
     }
 
-
-# Include API routers — v5
+# Register all modular API routers
 from app.api.auth_router import router as auth_router
 from app.api.admin_router import router as admin_router
+
 app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(chat_router)
@@ -97,7 +93,6 @@ app.include_router(analytics_router)
 app.include_router(customers_router)
 app.include_router(bookings_router)
 app.include_router(debug_router)
-
 
 if __name__ == "__main__":
     uvicorn.run(

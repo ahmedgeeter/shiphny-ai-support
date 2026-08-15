@@ -1,105 +1,53 @@
-<div align="center">
+# Shiphny AI Support & Logistics Platform
 
-<pre>
-   _____ _     _       _   _         _____ _    _        _____ _        _            _     
-  / ____| |   (_)     | | | |       |_   _| |  | |      / ____| |      | |          | |    
- | (___ | |__  _ _ __ | |_| |__  _   _| | | |__| |_____| (___ | |_ __ _| |_ ___  ___| |__  
-  \___ \| '_ \| | '_ \| __| '_ \| | | | | |  __  |______\___ \| __/ _` | __/ _ \/ __| '_ \ 
-  ____) | | | | | |_) | |_| | | | |_| |_| | |  | |      ____) | || (_| | ||  __/\__ \ | | |
- |_____/|_| |_|_| .__/ \__|_| |_|\__, |_____|_|  |_|     |_____/ \__\__,_|\__\___||___/_| |_|
-                | |               __/ |                                                    
-                |_|              |___/                                                     
-</pre>
+Shiphny is an enterprise-grade logistics and shipping management platform. I built this system to solve the complex challenges of tracking shipments, managing bookings, and handling customer support at scale. It integrates a secure, sandboxed AI agent directly into the core workflows to automate customer inquiries without compromising data security.
 
-<h3>Enterprise Logistics and Shipping Management System</h3>
+## Architecture & Tech Stack
 
-<p>
-  <strong>Kubernetes (EKS) | Terraform | Helm | GitHub Actions | Docker Compose | React | FastAPI</strong>
-</p>
+This project was engineered with a microservices-first approach, focusing heavily on scalability, fault tolerance, and security.
 
-</div>
+### Infrastructure & Deployment
+*   **Kubernetes (EKS):** The entire application is containerized and orchestrated via Kubernetes. I wrote custom Helm charts (`k8s/helm/shippny`) to parameterize deployments and ensure seamless Horizontal Pod Autoscaling (HPA).
+*   **Terraform:** All AWS infrastructure (VPC, private subnets, NAT Gateways, EKS cluster) is provisioned declaratively as Code (`infrastructure/main.tf`).
+*   **CI/CD Pipeline:** GitHub Actions automatically builds multi-stage Docker images, runs security scans, and updates the Kubernetes manifests upon every merge.
 
----
+### Backend (FastAPI & Python)
+*   **API Layer:** High-performance, asynchronous REST APIs built with FastAPI. It handles routing, JWT-based authentication, and strict Role-Based Access Control (RBAC).
+*   **Database:** PostgreSQL is used as the ACID-compliant persistent store for financial ledgers, bookings, and customer profiles. Migrations are managed securely via Alembic.
+*   **Background Processing:** Celery and Redis manage background tasks (like bulk invoice generation and asynchronous AI inference) so the main API thread is never blocked.
+*   **AI Integration:** I used LangGraph to build a deterministic, cyclic graph for the AI agent. The AI is strictly sandboxed—it cannot hallucinate data because it is forced to call verified internal tools (e.g., `get_shipment_status`) and must authenticate the user before revealing sensitive tracking information.
 
-## Project Overview
+### Frontend (React & TypeScript)
+*   **Client App:** A robust Single Page Application built with React and Vite. It provides dashboards for logistics operators to monitor fleets, and customer portals for tracking active shipments and interacting with the AI agent.
 
-Shiphny is a comprehensive, enterprise-grade logistics and shipping management platform designed to handle complex supply chain operations. The system provides a robust architecture for managing shipments, bookings, customer profiles, and invoicing, seamlessly integrated with an advanced, AI-driven customer support engine.
+## Core Features
 
-Built for scale and reliability, Shiphny leverages a modern microservices architecture orchestrated via Kubernetes, with infrastructure provisioned as code using Terraform. It is engineered to meet the high-availability and strict security demands of the global logistics industry.
+1.  **Shipment & Fleet Tracking:** Real-time visibility into the lifecycle of logistics operations.
+2.  **Automated Bookings:** A robust engine for managing client freight schedules.
+3.  **Financial Ledger:** Automated invoicing and billing cycles.
+4.  **Autonomous Support Agent:** An AI that acts as a Tier 1 support engineer. It reads the user's authentication context, checks their active shipments, answers general knowledge base queries, and verifies identity before looking up external tracking numbers.
 
----
+## Local Development Setup
 
-## Core Domain Features
+You can run the entire microservices stack locally without needing AWS credentials.
 
-The platform focuses on automating and streamlining core logistics workflows:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/ahmedgeeter/shiphny-ai-support.git
+   cd shiphny-ai-support
+   ```
 
-*   **Shipment Tracking and Management:** End-to-end visibility into shipment lifecycles, real-time status updates, and destination tracking.
-*   **Booking and Scheduling:** Automated booking systems connecting clients with available freight and transportation assets.
-*   **Customer Relationship Management:** Centralized profiles, order history, and account management for B2B and B2C clients.
-*   **Invoicing and Billing:** Automated financial ledger handling billing cycles, invoice generation, and payment tracking.
-*   **Intelligent AI Support:** A secure, context-aware AI assistant integrated directly into the platform to resolve customer inquiries, track orders, and process logistics data without human intervention.
+2. Configure environment variables:
+   ```bash
+   cp backend/.env.example backend/.env
+   # Add your required API keys to backend/.env
+   ```
 
----
+3. Spin up the cluster using Docker Compose:
+   ```bash
+   docker-compose up --build
+   ```
 
-## System Architecture
+This command will initialize PostgreSQL, run all necessary database migrations, start Redis, and boot both the FastAPI backend (port 8000) and the React frontend (port 3000).
 
-The system utilizes a decoupled microservices approach to ensure horizontal scalability and fault tolerance.
-
-*   **Frontend (React):** A highly responsive Single Page Application (SPA) providing intuitive dashboards for logistics operators and clients.
-*   **Backend (FastAPI):** High-performance, asynchronous REST APIs handling core business logic, database transactions, and authentication.
-*   **Task Queue (Celery and Redis):** Background processing for resource-intensive tasks, such as generating large invoice batches or processing complex AI inference requests, ensuring the main API remains non-blocking.
-*   **Relational Database (PostgreSQL):** ACID-compliant persistent storage for critical logistics data, bookings, and financial records.
-
----
-
-## Security and Protection Mechanisms
-
-Given the sensitive nature of shipping data and financial transactions, the platform implements rigorous security protocols:
-
-*   **Defense-in-Depth Authentication:** Secure, token-based authentication (JWT) with strict Role-Based Access Control (RBAC) ensuring data isolation between different clients and operators.
-*   **AI Sandbox and Prompt Injection Protection:** The integrated AI support agent operates within a strict deterministic sandbox. It utilizes cryptographic verification tags and system-level guards to prevent prompt injection attacks or unauthorized data access. The AI cannot bypass core authentication rules.
-*   **Network Isolation:** Database and cache layers operate in isolated private subnets within a custom AWS VPC, completely inaccessible from the public internet.
-
----
-
-## Infrastructure and DevOps Automation
-
-The deployment lifecycle is fully automated, enforcing immutable infrastructure and GitOps methodologies.
-
-*   **Infrastructure as Code (Terraform):** The `infrastructure/` directory contains declarative configurations for AWS, provisioning a secure VPC, NAT Gateways, and an Elastic Kubernetes Service (EKS) cluster.
-*   **Kubernetes Orchestration (Helm):** The `k8s/helm/shippny` charts parameterize the deployment of all microservices, utilizing Horizontal Pod Autoscalers (HPA) to scale resources dynamically based on load.
-*   **Continuous Integration and Continuous Deployment (GitHub Actions):** Every commit triggers an automated pipeline that builds optimized, multi-stage Docker images, scans for vulnerabilities, pushes to the GitHub Container Registry, and updates deployment manifests.
-
----
-
-## Local Development and Evaluation
-
-The entire logistics microservices stack can be evaluated locally without requiring access to the production AWS environment.
-
-### Requirements
-*   Docker and Docker Compose
-*   Git
-
-### Quick Start Guide
-
-1.  **Clone the Repository:**
-    ```bash
-    git clone https://github.com/ahmedgeeter/shiphny-ai-support.git
-    cd shiphny-ai-support
-    ```
-
-2.  **Environment Configuration:**
-    Create a local environment file based on the provided template:
-    ```bash
-    cp backend/.env.example backend/.env
-    ```
-
-3.  **Start the Services:**
-    Launch the database, cache, backend APIs, and frontend client:
-    ```bash
-    docker-compose up --build
-    ```
-
-Docker Compose will automatically provision isolated PostgreSQL and Redis instances, execute necessary database schema migrations, and expose the FastAPI backend on port 8000 and the React frontend on port 3000. 
-
-Interactive API documentation is accessible at `http://localhost:8000/api/docs`.
+API Documentation will be accessible at: `http://localhost:8000/api/docs`
